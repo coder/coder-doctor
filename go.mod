@@ -1,4 +1,4 @@
-module github.com/cdr/doctor
+module github.com/cdr/coder-doctor
 
 go 1.16
 

@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/cdr/doctor/internal/api"
+	"github.com/cdr/coder-doctor/internal/api"
 )
 
 func CheckVersion(ctx context.Context, opts api.CheckOptions) api.CheckResults {

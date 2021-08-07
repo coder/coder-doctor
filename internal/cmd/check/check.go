@@ -1,7 +1,7 @@
 package check
 
 import (
-	"github.com/cdr/doctor/internal/cmd/check/kubernetes"
+	"github.com/cdr/coder-doctor/internal/cmd/check/kubernetes"
 	"github.com/spf13/cobra"
 )
 

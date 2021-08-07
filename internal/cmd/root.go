@@ -3,8 +3,8 @@ package cmd
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/cdr/doctor/internal/cmd/check"
-	"github.com/cdr/doctor/internal/cmd/version"
+	"github.com/cdr/coder-doctor/internal/cmd/check"
+	"github.com/cdr/coder-doctor/internal/cmd/version"
 )
 
 func NewDefaultDoctorCommand() *cobra.Command {

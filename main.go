@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 
-	"github.com/cdr/doctor/internal/cmd"
+	"github.com/cdr/coder-doctor/internal/cmd"
 )
 
 func main() {

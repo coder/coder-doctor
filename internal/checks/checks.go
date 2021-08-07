@@ -3,8 +3,8 @@ package checks
 import (
 	"context"
 
-	"github.com/cdr/doctor/internal/api"
-	"github.com/cdr/doctor/internal/checks/kubernetes"
+	"github.com/cdr/coder-doctor/internal/api"
+	"github.com/cdr/coder-doctor/internal/checks/kubernetes"
 )
 
 var kubernetesChecks = []api.Check{

@@ -1,8 +1,8 @@
 package kubernetes
 
 import (
-	"github.com/cdr/doctor/internal/api"
-	"github.com/cdr/doctor/internal/checks"
+	"github.com/cdr/coder-doctor/internal/api"
+	"github.com/cdr/coder-doctor/internal/checks"
 	"github.com/spf13/cobra"
 
 	"k8s.io/client-go/kubernetes"
