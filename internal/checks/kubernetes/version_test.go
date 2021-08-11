@@ -42,7 +42,7 @@ func TestVersions(t *testing.T) {
 			ExpectedResult: &api.CheckResult{
 				Name:    "kubernetes-version",
 				State:   api.StatePassed,
-				Summary: "",
+				Summary: "Coder 1.21.0 supports Kubernetes 1.19.0 to 1.22.0 (server version 1.20.8-gke.900)",
 				Details: map[string]interface{}{
 					"build-date":     "2021-06-30T09:23:36Z",
 					"compiler":       "gc",
@@ -69,6 +69,22 @@ func TestVersions(t *testing.T) {
 				GoVersion:    "go1.13.15b4",
 				Compiler:     "gc",
 				Platform:     "linux/amd64",
+			},
+			ExpectedResult: &api.CheckResult{
+				Name:    "kubernetes-version",
+				State:   2,
+				Summary: "Coder 1.21.0 supports Kubernetes 1.19.0 to 1.22.0 and was not tested with 1.18.20-gke.900",
+				Details: map[string]interface{}{
+					"build-date":     "2021-06-28T09:19:58Z",
+					"compiler":       "gc",
+					"git-commit":     "1facb91642e16cb4f5be4e4a632c488aa4700382",
+					"git-tree-state": "clean",
+					"git-version":    "v1.18.20-gke.900",
+					"go-version":     "go1.13.15b4",
+					"major":          "1",
+					"minor":          "18+",
+					"platform":       "linux/amd64",
+				},
 			},
 		},
 	}
