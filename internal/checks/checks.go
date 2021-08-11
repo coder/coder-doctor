@@ -7,10 +7,8 @@ import (
 	"github.com/cdr/coder-doctor/internal/checks/kubernetes"
 )
 
-var kubernetesChecks = []api.Check{
-	kubernetes.CheckVersion,
-}
-
 func RunKubernetes(ctx context.Context, opts api.CheckOptions) api.CheckResults {
-	return kubernetes.CheckVersion(ctx, opts)
+	return api.CheckResults{
+		kubernetes.CheckVersion(ctx, opts),
+	}
 }

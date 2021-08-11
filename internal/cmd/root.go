@@ -9,8 +9,10 @@ import (
 
 func NewDefaultDoctorCommand() *cobra.Command {
 	rootCmd := &cobra.Command{
-		Use:  "coder-doctor",
-		Args: cobra.ExactArgs(1),
+		Use:   "coder-doctor",
+		Short: "coder-doctor checks compatibility with Coder",
+		Long:  `coder-doctor is a tool for analyzing that Coder's dependencies satisfy our requirements.`,
+		Args:  cobra.ExactArgs(1),
 	}
 	rootCmd.AddCommand(
 		version.NewCommand(),

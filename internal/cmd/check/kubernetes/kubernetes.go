@@ -1,6 +1,7 @@
 package kubernetes
 
 import (
+	"github.com/Masterminds/semver/v3"
 	"github.com/cdr/coder-doctor/internal/api"
 	"github.com/cdr/coder-doctor/internal/checks"
 	"github.com/spf13/cobra"
@@ -25,8 +26,6 @@ func NewCommand() *cobra.Command {
 }
 
 func run(cmd *cobra.Command, args []string) error {
-	cmd.Println("scanning kubernetes cluster")
-
 	config, err := clientcmd.BuildConfigFromFlags("", "/home/coder/.kube/config")
 	if err != nil {
 		panic(err.Error())
@@ -37,12 +36,21 @@ func run(cmd *cobra.Command, args []string) error {
 		panic(err.Error())
 	}
 
-	results := checks.RunKubernetes(cmd.Context(), api.CheckOptions{
-		Kubernetes: clientset,
-	})
-	for _, result := range results {
-		cmd.Println(result.Summary)
+	coderVersion, err := cmd.InheritedFlags().GetString("coder-version")
+	if err != nil {
+		panic(err.Error())
 	}
+
+	cv, err := semver.NewVersion(coderVersion)
+	if err != nil {
+		panic(err.Error())
+	}
+
+	results := checks.RunKubernetes(cmd.Context(), api.CheckOptions{
+		Kubernetes:   clientset,
+		CoderVersion: cv,
+	})
+	PrintResults(cmd.OutOrStdout(), results)
 
 	return nil
 }

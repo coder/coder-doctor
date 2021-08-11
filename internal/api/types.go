@@ -10,7 +10,7 @@ import (
 type Check func(context.Context, CheckOptions) CheckResults
 
 type CheckOptions struct {
-	CoderVersion semver.Version
+	CoderVersion *semver.Version
 	Kubernetes   kubernetes.Interface
 }
 
@@ -31,4 +31,15 @@ type CheckResult struct {
 	Details map[string]interface{}
 }
 
-type CheckResults []CheckResult
+func ErrorResult(name string, summary string, err error) *CheckResult {
+	return &CheckResult{
+		Name:    name,
+		State:   StateFailed,
+		Summary: summary,
+		Details: map[string]interface{}{
+			"error": err,
+		},
+	}
+}
+
+type CheckResults []*CheckResult
