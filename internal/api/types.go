@@ -2,16 +2,21 @@ package api
 
 import (
 	"context"
-
-	"github.com/Masterminds/semver/v3"
-	"k8s.io/client-go/kubernetes"
 )
 
-type Check func(context.Context, CheckOptions) CheckResults
+type Checker interface {
+	// Validate returns an error if, and only if, the Checker was not
+	// configured correctly.
+	//
+	// This method is responsible for verifying that the Checker has
+	// all required parameters and the required parameters are valid,
+	// and that optional parameters are valid, if set.
+	Validate() error
 
-type CheckOptions struct {
-	CoderVersion *semver.Version
-	Kubernetes   kubernetes.Interface
+	// Run runs the checks and returns the results.
+	//
+	// This method will run through the checks and return results.
+	Run(context.Context) CheckResults
 }
 
 type CheckState int
@@ -29,17 +34,6 @@ type CheckResult struct {
 	State   CheckState
 	Summary string
 	Details map[string]interface{}
-}
-
-func ErrorResult(name string, summary string, err error) *CheckResult {
-	return &CheckResult{
-		Name:    name,
-		State:   StateFailed,
-		Summary: summary,
-		Details: map[string]interface{}{
-			"error": err,
-		},
-	}
 }
 
 type CheckResults []*CheckResult

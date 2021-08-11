@@ -1,9 +1,11 @@
-package kubernetes
+package kube
 
 import (
+	"context"
+
+	"cdr.dev/slog"
+	"cdr.dev/slog/sloggers/sloghuman"
 	"github.com/Masterminds/semver/v3"
-	"github.com/cdr/coder-doctor/internal/api"
-	"github.com/cdr/coder-doctor/internal/checks"
 	"github.com/spf13/cobra"
 
 	"k8s.io/client-go/kubernetes"
@@ -13,6 +15,9 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth/oidc"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/openstack"
 	"k8s.io/client-go/tools/clientcmd"
+
+	"github.com/cdr/coder-doctor/internal/api"
+	"github.com/cdr/coder-doctor/internal/checks/kube"
 )
 
 func NewCommand() *cobra.Command {
@@ -46,11 +51,16 @@ func run(cmd *cobra.Command, args []string) error {
 		panic(err.Error())
 	}
 
-	results := checks.RunKubernetes(cmd.Context(), api.CheckOptions{
-		Kubernetes:   clientset,
-		CoderVersion: cv,
-	})
-	PrintResults(cmd.OutOrStdout(), results)
+	log := slog.Make(sloghuman.Sink(cmd.OutOrStdout())).Leveled(slog.LevelDebug)
+	log.Debug(context.TODO(), "test message")
+
+	checker := kube.NewKubernetesChecker(
+		kube.WithClient(clientset),
+		kube.WithCoderVersion(cv),
+		kube.WithLogger(log),
+	)
+	results := checker.Run(cmd.Context())
+	api.WriteResults(cmd.OutOrStdout(), results)
 
 	return nil
 }

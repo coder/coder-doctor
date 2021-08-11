@@ -1,7 +1,7 @@
 package check
 
 import (
-	"github.com/cdr/coder-doctor/internal/cmd/check/kubernetes"
+	"github.com/cdr/coder-doctor/internal/cmd/check/kube"
 	"github.com/spf13/cobra"
 )
 
@@ -16,7 +16,7 @@ func NewCommand() *cobra.Command {
 	checkCmd.PersistentFlags().String("coder-version", "1.21", "version of Coder")
 
 	checkCmd.AddCommand(
-		kubernetes.NewCommand(),
+		kube.NewCommand(),
 	)
 
 	return checkCmd
