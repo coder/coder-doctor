@@ -16,21 +16,31 @@ func ErrorResult(name string, summary string, err error) *CheckResult {
 	}
 }
 
-func WriteResults(out io.Writer, results CheckResults) {
+func WriteResults(out io.Writer, results CheckResults) error {
+	var err error
 	for _, result := range results {
 		switch result.State {
 		case StatePassed:
-			io.WriteString(out, "PASS ")
+			_, err = io.WriteString(out, "PASS ")
 		case StateWarning:
-			io.WriteString(out, "WARN ")
+			_, err = io.WriteString(out, "WARN ")
 		case StateFailed:
-			io.WriteString(out, "FAIL ")
+			_, err = io.WriteString(out, "FAIL ")
 		case StateInfo:
-			io.WriteString(out, "INFO ")
+			_, err = io.WriteString(out, "INFO ")
 		case StateSkipped:
-			io.WriteString(out, "SKIP ")
+			_, err = io.WriteString(out, "SKIP ")
 		}
 
-		fmt.Fprintln(out, result.Summary)
+		if err != nil {
+			return err
+		}
+
+		_, err = fmt.Fprintln(out, result.Summary)
+		if err != nil {
+			return err
+		}
 	}
+
+	return nil
 }

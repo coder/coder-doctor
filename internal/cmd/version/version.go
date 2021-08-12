@@ -11,7 +11,7 @@ func NewCommand() *cobra.Command {
 	}
 }
 
-func run(cmd *cobra.Command, args []string) error {
+func run(cmd *cobra.Command, _ []string) error {
 	cmd.Println("tool version: 1234")
 	return nil
 }

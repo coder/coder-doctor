@@ -34,7 +34,7 @@ func NewKubernetesChecker(opts ...KubernetesCheckOption) *KubernetesChecker {
 	return checker
 }
 
-func (k *KubernetesChecker) Validate() error {
+func (*KubernetesChecker) Validate() error {
 	return nil
 }
 

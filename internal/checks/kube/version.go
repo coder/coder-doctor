@@ -34,6 +34,7 @@ func findNearestVersion(coderVersion *semver.Version) *CoderVersionRequirement {
 	var selectedVersion *CoderVersionRequirement
 
 	for _, v := range versionRequirements {
+		v := v
 		if !v.CoderVersion.GreaterThan(coderVersion) {
 			selectedVersion = &v
 			break
