@@ -8,7 +8,7 @@ import (
 	"cdr.dev/slog"
 	"cdr.dev/slog/sloggers/sloghuman"
 
-	kclient "k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/kubernetes"
 	// Kubernetes authentication plugins
 	_ "k8s.io/client-go/plugin/pkg/client/auth/azure"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/exec"
@@ -17,8 +17,8 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth/openstack"
 	"k8s.io/client-go/tools/clientcmd"
 
-	"github.com/cdr/coder-doctor/internal/api"
 	"github.com/cdr/coder-doctor/internal/checks/kube"
+	"github.com/cdr/coder-doctor/internal/humanwriter"
 )
 
 func NewCommand() *cobra.Command {
@@ -78,7 +78,7 @@ func run(cmd *cobra.Command, _ []string) error {
 		return err
 	}
 
-	clientset, err := kclient.NewForConfig(config)
+	clientset, err := kubernetes.NewForConfig(config)
 	if err != nil {
 		return err
 	}
@@ -99,6 +99,8 @@ func run(cmd *cobra.Command, _ []string) error {
 		return err
 	}
 
+	// TODO: this is pretty arbitrary, use a defined verbosity similar to
+	// kubectl
 	if verbosity > 5 {
 		log = log.Leveled(slog.LevelDebug)
 	}
@@ -109,10 +111,15 @@ func run(cmd *cobra.Command, _ []string) error {
 		kube.WithLogger(log),
 	)
 
+	writer := humanwriter.New()
+
 	results := checker.Run(cmd.Context())
-	err = api.WriteResults(cmd.OutOrStdout(), results)
-	if err != nil {
-		return xerrors.Errorf("failed to write results to stdout: %w", err)
+	for _, result := range results {
+		err = writer.WriteResult(result)
+		if err != nil {
+			return xerrors.Errorf("failed to write results to stdout: %w", err)
+		}
+
 	}
 
 	return nil
