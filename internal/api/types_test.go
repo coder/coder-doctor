@@ -19,14 +19,20 @@ func TestKnownStates(t *testing.T) {
 	}
 
 	for _, state := range states {
+		state := state
+
 		t.Run(state.String(), func(t *testing.T) {
+			t.Parallel()
+
 			emoji, err := state.Emoji()
 			assert.Success(t, "state.Emoji() error non-nil", err)
 			assert.True(t, "state.Emoji() is non-empty", len(emoji) > 0)
+			_ = state.MustEmoji()
 
 			text, err := state.Text()
 			assert.Success(t, "state.Text() error non-nil", err)
 			assert.True(t, "state.Text() is non-empty", len(text) > 0)
+			_ = state.MustText()
 
 			str := state.String()
 			assert.True(t, "state.String() is non-empty", len(str) > 0)

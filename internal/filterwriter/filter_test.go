@@ -10,9 +10,9 @@ import (
 	"github.com/cdr/coder-doctor/internal/humanwriter"
 )
 
-var _ = api.ResultWriter(&filterwriter.FilterWriter{})
-
 func TestFilter(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		Name           string
 		Options        []filterwriter.Option
@@ -41,7 +41,7 @@ func TestFilter(t *testing.T) {
 					Summary: "info message",
 				},
 			},
-			ExpectedOutput: "passed result\nfailed result\n",
+			ExpectedOutput: "PASS passed result\nFAIL failed result\n",
 		}, {
 			// Everything filtered out, write at each level and verify the
 			// result is empty
@@ -89,7 +89,7 @@ func TestFilter(t *testing.T) {
 					Summary: "info result",
 				},
 			},
-			ExpectedOutput: "info message\ninfo result\n",
+			ExpectedOutput: "INFO info message\nINFO info result\n",
 		},
 	}
 
@@ -97,6 +97,8 @@ func TestFilter(t *testing.T) {
 		test := test
 
 		t.Run(test.Name, func(t *testing.T) {
+			t.Parallel()
+
 			var sb strings.Builder
 
 			w := filterwriter.Must(humanwriter.New(&sb), test.Options...)

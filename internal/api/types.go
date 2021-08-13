@@ -19,7 +19,7 @@ type Checker interface {
 	// Run runs the checks and returns the results.
 	//
 	// This method will run through the checks and return results.
-	Run(context.Context) CheckResults
+	Run(context.Context) error
 }
 
 var _ = fmt.Stringer(StatePassed)
@@ -57,15 +57,15 @@ func (s CheckState) MustEmoji() string {
 func (s CheckState) Emoji() (string, error) {
 	switch s {
 	case StatePassed:
-		return "✅", nil
+		return "👍", nil
 	case StateWarning:
 		return "⚠️", nil
 	case StateFailed:
-		return "❌", nil
+		return "👎", nil
 	case StateInfo:
-		return "ℹ️", nil
+		return "🔔", nil
 	case StateSkipped:
-		return "🤔", nil
+		return "⏩", nil
 	}
 
 	return "", xerrors.Errorf("unknown state: %d", s)
@@ -119,5 +119,3 @@ type CheckResult struct {
 	Summary string
 	Details map[string]interface{}
 }
-
-type CheckResults []*CheckResult

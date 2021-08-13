@@ -5,9 +5,10 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"cdr.dev/slog"
 	"github.com/Masterminds/semver/v3"
 	"k8s.io/apimachinery/pkg/version"
+
+	"cdr.dev/slog"
 
 	"github.com/cdr/coder-doctor/internal/api"
 )

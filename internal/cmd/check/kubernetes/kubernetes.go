@@ -1,14 +1,15 @@
 package kubernetes
 
 import (
+	"os"
+
 	"github.com/Masterminds/semver/v3"
 	"github.com/spf13/cobra"
-	"golang.org/x/xerrors"
 
 	"cdr.dev/slog"
 	"cdr.dev/slog/sloggers/sloghuman"
 
-	"k8s.io/client-go/kubernetes"
+	kclient "k8s.io/client-go/kubernetes"
 	// Kubernetes authentication plugins
 	_ "k8s.io/client-go/plugin/pkg/client/auth/azure"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/exec"
@@ -78,7 +79,7 @@ func run(cmd *cobra.Command, _ []string) error {
 		return err
 	}
 
-	clientset, err := kubernetes.NewForConfig(config)
+	clientset, err := kclient.NewForConfig(config)
 	if err != nil {
 		return err
 	}
@@ -106,20 +107,15 @@ func run(cmd *cobra.Command, _ []string) error {
 	}
 
 	checker := kube.NewKubernetesChecker(
-		kube.WithClient(clientset),
-		kube.WithCoderVersion(cv),
+		clientset,
 		kube.WithLogger(log),
+		kube.WithCoderVersion(cv),
+		kube.WithWriter(humanwriter.New(os.Stdout)),
 	)
 
-	writer := humanwriter.New()
-
-	results := checker.Run(cmd.Context())
-	for _, result := range results {
-		err = writer.WriteResult(result)
-		if err != nil {
-			return xerrors.Errorf("failed to write results to stdout: %w", err)
-		}
-
+	err = checker.Run(cmd.Context())
+	if err != nil {
+		return err
 	}
 
 	return nil

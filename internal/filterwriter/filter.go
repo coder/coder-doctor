@@ -4,6 +4,8 @@ import (
 	"github.com/cdr/coder-doctor/internal/api"
 )
 
+var _ = api.ResultWriter(&FilterWriter{})
+
 type FilterWriter struct {
 	writer api.ResultWriter
 	filter int

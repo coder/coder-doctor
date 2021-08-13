@@ -115,13 +115,56 @@ func TestVersions(t *testing.T) {
 			})
 			assert.Success(t, "failed to create client", err)
 
-			checker := NewKubernetesChecker(WithClient(client), WithCoderVersion(test.CoderVersion))
+			checker := NewKubernetesChecker(client, WithCoderVersion(test.CoderVersion))
 			result := checker.CheckVersion(context.Background())
 			assert.Equal(t, "check result matches", test.ExpectedResult, result)
 		})
 	}
 }
 
+func TestUnknownRoute(t *testing.T) {
+	t.Parallel()
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusNotFound)
+	}))
+	defer server.Close()
+
+	client, err := kubernetes.NewForConfig(&rest.Config{
+		Host: server.URL,
+	})
+	assert.Success(t, "failed to create client", err)
+
+	checker := NewKubernetesChecker(client)
+	result := checker.CheckVersion(context.Background())
+	assert.Equal(t, "failed check", api.StateFailed, result.State)
+	assert.ErrorContains(t, "unknown route", result.Details["error"].(error), "the server could not find the requested resource")
+}
+
+func TestCorruptResponse(t *testing.T) {
+	t.Parallel()
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		err := json.NewEncoder(w).Encode(map[string]interface{}{
+			"gitVersion": 10,
+		})
+		assert.Success(t, "failed to encode response", err)
+	}))
+	defer server.Close()
+
+	client, err := kubernetes.NewForConfig(&rest.Config{
+		Host: server.URL,
+	})
+	assert.Success(t, "failed to create client", err)
+
+	checker := NewKubernetesChecker(client)
+	result := checker.CheckVersion(context.Background())
+	assert.Equal(t, "failed check", api.StateFailed, result.State)
+	assert.ErrorContains(t, "unknown route", result.Details["error"].(error), "json: cannot unmarshal number into Go struct field Info.gitVersion of type string")
+}
 func TestNearestVersion(t *testing.T) {
 	t.Parallel()
 

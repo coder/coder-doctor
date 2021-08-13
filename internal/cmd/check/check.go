@@ -1,8 +1,9 @@
 package check
 
 import (
-	"github.com/cdr/coder-doctor/internal/cmd/check/kubernetes"
 	"github.com/spf13/cobra"
+
+	"github.com/cdr/coder-doctor/internal/cmd/check/kubernetes"
 )
 
 func NewCommand() *cobra.Command {

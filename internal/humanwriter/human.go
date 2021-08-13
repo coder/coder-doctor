@@ -7,10 +7,18 @@ import (
 	"github.com/cdr/coder-doctor/internal/api"
 )
 
+var _ = api.ResultWriter(&HumanResultWriter{})
+var _ = fmt.Stringer(OutputModeEmoji)
+
 type OutputMode int
 
 const (
+	// OutputModeTest causes the writer to prepend a plain-text
+	// description of the check result (PASS, FAIL, SKIP, etc)
 	OutputModeText OutputMode = iota
+
+	// OutputModeEmoji causes the writer to prepend an emoji
+	// describing the check result.
 	OutputModeEmoji
 )
 

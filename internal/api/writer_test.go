@@ -7,8 +7,6 @@ import (
 	"github.com/cdr/coder-doctor/internal/api"
 )
 
-var _ = api.ResultWriter(&api.DiscardWriter{})
-
 func TestDiscardWriter(t *testing.T) {
 	t.Parallel()
 
