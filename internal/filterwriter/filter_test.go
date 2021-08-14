@@ -27,22 +27,27 @@ func TestFilter(t *testing.T) {
 				{
 					State:   api.StateInfo,
 					Summary: "filtered message",
-				}, {
+				},
+				{
 					State:   api.StateSkipped,
 					Summary: "skipped message",
-				}, {
+				},
+				{
 					State:   api.StatePassed,
 					Summary: "passed result",
-				}, {
+				},
+				{
 					State:   api.StateFailed,
 					Summary: "failed result",
-				}, {
+				},
+				{
 					State:   api.StateInfo,
 					Summary: "info message",
 				},
 			},
 			ExpectedOutput: "PASS passed result\nFAIL failed result\n",
-		}, {
+		},
+		{
 			// Everything filtered out, write at each level and verify the
 			// result is empty
 			Name: "filter-everything",
@@ -60,7 +65,8 @@ func TestFilter(t *testing.T) {
 				},
 			},
 			ExpectedOutput: "",
-		}, {
+		},
+		{
 			// Accept informational messages only
 			Name: "accept-informational",
 			Options: []filterwriter.Option{
@@ -75,21 +81,26 @@ func TestFilter(t *testing.T) {
 				{
 					State:   api.StateInfo,
 					Summary: "info message",
-				}, {
+				},
+				{
 					State:   api.StateSkipped,
 					Summary: "skipped message",
-				}, {
+				},
+				{
 					State:   api.StatePassed,
 					Summary: "passed result",
-				}, {
+				},
+				{
 					State:   api.StateFailed,
 					Summary: "failed result",
-				}, {
+				},
+				{
 					State:   api.StateInfo,
 					Summary: "info result",
 				},
 			},
-			ExpectedOutput: "INFO info message\nINFO info result\n",
+			ExpectedOutput: "INFO info message\n" +
+				"INFO info result\n",
 		},
 	}
 

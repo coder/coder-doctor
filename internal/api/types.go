@@ -114,8 +114,8 @@ func (s CheckState) String() string {
 }
 
 type CheckResult struct {
-	Name    string
-	State   CheckState
-	Summary string
-	Details map[string]interface{}
+	Name    string                 `json:"name"`
+	State   CheckState             `json:"state"`
+	Summary string                 `json:"summary"`
+	Details map[string]interface{} `json:"details,omitempty"`
 }

@@ -24,7 +24,8 @@ var versionRequirements = []CoderVersionRequirement{
 		CoderVersion:         semver.MustParse("1.21"),
 		KubernetesVersionMin: semver.MustParse("1.19"),
 		KubernetesVersionMax: semver.MustParse("1.22"),
-	}, {
+	},
+	{
 		CoderVersion:         semver.MustParse("1.20"),
 		KubernetesVersionMin: semver.MustParse("1.19"),
 		KubernetesVersionMax: semver.MustParse("1.21"),

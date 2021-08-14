@@ -46,12 +46,6 @@ func WithWriter(writer api.ResultWriter) Option {
 	}
 }
 
-func WithClient(client kubernetes.Interface) Option {
-	return func(k *KubernetesChecker) {
-		k.client = client
-	}
-}
-
 func WithCoderVersion(version *semver.Version) Option {
 	return func(k *KubernetesChecker) {
 		k.coderVersion = version

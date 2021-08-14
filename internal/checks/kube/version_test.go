@@ -177,7 +177,8 @@ func TestNearestVersion(t *testing.T) {
 			Name:             "exact-match",
 			RequestedVersion: "1.20.0",
 			NearestVersion:   "1.20.0",
-		}, {
+		},
+		{
 			Name:             "nearby-match",
 			RequestedVersion: "1.20.1",
 			NearestVersion:   "1.20.0",
@@ -188,8 +189,10 @@ func TestNearestVersion(t *testing.T) {
 		test := test
 		t.Run(test.Name, func(t *testing.T) {
 			t.Parallel()
+
 			requestedVersion := semver.MustParse(test.RequestedVersion)
 			nearestVersion := semver.MustParse(test.NearestVersion)
+
 			found := findNearestVersion(requestedVersion)
 			assert.Equal(t, "nearest version matches", nearestVersion, found.CoderVersion)
 		})
