@@ -5,6 +5,7 @@ import (
 
 	"github.com/Masterminds/semver/v3"
 	"github.com/spf13/cobra"
+	"golang.org/x/xerrors"
 
 	"cdr.dev/slog"
 	"cdr.dev/slog/sloggers/sloghuman"
@@ -44,17 +45,17 @@ func getConfigOverridesFromFlags(cmd *cobra.Command) (*clientcmd.ConfigOverrides
 
 	overrides.CurrentContext, err = cmd.Flags().GetString(clientcmd.FlagContext)
 	if err != nil {
-		return nil, err
+		return nil, xerrors.Errorf("parse %s: %w", clientcmd.FlagContext, err)
 	}
 
 	overrides.Context.Namespace, err = cmd.Flags().GetString(clientcmd.FlagNamespace)
 	if err != nil {
-		return nil, err
+		return nil, xerrors.Errorf("parse %s: %w", clientcmd.FlagNamespace, err)
 	}
 
 	overrides.Context.Cluster, err = cmd.Flags().GetString(clientcmd.FlagClusterName)
 	if err != nil {
-		return nil, err
+		return nil, xerrors.Errorf("parse %s: %w", clientcmd.FlagClusterName, err)
 	}
 
 	return overrides, nil
@@ -66,38 +67,38 @@ func run(cmd *cobra.Command, _ []string) error {
 	var err error
 	loadingRules.ExplicitPath, err = cmd.Flags().GetString(clientcmd.RecommendedConfigPathFlag)
 	if err != nil {
-		return err
+		return xerrors.Errorf("parse %s: %w", clientcmd.RecommendedConfigPathFlag, err)
 	}
 
 	overrides, err := getConfigOverridesFromFlags(cmd)
 	if err != nil {
-		return err
+		return xerrors.Errorf("parse flags: %w", err)
 	}
 
 	config, err := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(loadingRules, overrides).ClientConfig()
 	if err != nil {
-		return err
+		return xerrors.Errorf("creating NonInteractiveDeferredLoadingClientConfig: %w", err)
 	}
 
 	clientset, err := kclient.NewForConfig(config)
 	if err != nil {
-		return err
+		return xerrors.Errorf("creating kube client from config: %w", err)
 	}
 
 	coderVersion, err := cmd.Flags().GetString("coder-version")
 	if err != nil {
-		return err
+		return xerrors.Errorf("parse coder-version string: %w", err)
 	}
 
 	cv, err := semver.NewVersion(coderVersion)
 	if err != nil {
-		return err
+		return xerrors.Errorf("parse coder-version from string %q: %w", coderVersion, err)
 	}
 
 	log := slog.Make(sloghuman.Sink(cmd.OutOrStdout()))
 	verbosity, err := cmd.Flags().GetInt("verbosity")
 	if err != nil {
-		return err
+		return xerrors.Errorf("parse verbosity: %w", err)
 	}
 
 	// TODO: this is pretty arbitrary, use a defined verbosity similar to
@@ -115,7 +116,7 @@ func run(cmd *cobra.Command, _ []string) error {
 
 	err = checker.Run(cmd.Context())
 	if err != nil {
-		return err
+		return xerrors.Errorf("run kube checker: %w", err)
 	}
 
 	return nil

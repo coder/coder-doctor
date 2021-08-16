@@ -6,6 +6,7 @@ import (
 
 	"github.com/Masterminds/semver/v3"
 	"k8s.io/client-go/kubernetes"
+	"golang.org/x/xerrors"
 
 	"cdr.dev/slog"
 	"cdr.dev/slog/sloggers/sloghuman"
@@ -65,7 +66,7 @@ func (*KubernetesChecker) Validate() error {
 func (k *KubernetesChecker) Run(ctx context.Context) error {
 	err := k.writer.WriteResult(k.CheckVersion(ctx))
 	if err != nil {
-		return err
+		return xerrors.Errorf("check version: %w", err)
 	}
 	return nil
 }

@@ -60,7 +60,7 @@ func (k *KubernetesChecker) CheckVersion(ctx context.Context) *api.CheckResult {
 
 	err = json.Unmarshal(body, &versionInfo)
 	if err != nil {
-		return api.ErrorResult(checkName, "failed to parse server version", err)
+		return api.ErrorResult(checkName, "failed to unmarshal version info", err)
 	}
 
 	selectedVersion := findNearestVersion(k.coderVersion)
