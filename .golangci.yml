@@ -4,6 +4,7 @@
 linters-settings:
   goimports:
     local-prefixes: coder.com,cdr.dev,go.coder.com,github.com/cdr
+
   gomodguard:
     blocked:
       modules:
@@ -45,58 +46,62 @@ linters-settings:
               two prior minor releases and current release. For details, see
               https://www.notion.so/Kubernetes-version-support-strategy-82ecd5c9761e411e9dab61a7a1484418
       local_replace_directives: true
+
   importas:
-    # For the most part, these come from  come from k8s.io/client-go,
-    # particularly clientset.go. Even the official Kubernetes codebase
-    # has conflicts, though.
-    admissionregistrationv1: k8s.io/client-go/kubernetes/typed/admissionregistration/v1
-    admissionregistrationv1beta1: k8s.io/client-go/kubernetes/typed/admissionregistration/v1beta1
-    appsv1: k8s.io/client-go/kubernetes/typed/apps/v1
-    appsv1beta1: k8s.io/client-go/kubernetes/typed/apps/v1beta1
-    appsv1beta2: k8s.io/client-go/kubernetes/typed/apps/v1beta2
-    authenticationv1: k8s.io/client-go/kubernetes/typed/authentication/v1
-    authenticationv1beta1: k8s.io/client-go/kubernetes/typed/authentication/v1beta1
-    authorizationv1: k8s.io/client-go/kubernetes/typed/authorization/v1
-    authorizationv1beta1: k8s.io/client-go/kubernetes/typed/authorization/v1beta1
-    autoscalingv1: k8s.io/client-go/kubernetes/typed/autoscaling/v1
-    autoscalingv2beta1: k8s.io/client-go/kubernetes/typed/autoscaling/v2beta1
-    autoscalingv2beta2: k8s.io/client-go/kubernetes/typed/autoscaling/v2beta2
-    batchv1: k8s.io/client-go/kubernetes/typed/batch/v1
-    batchv1beta1: k8s.io/client-go/kubernetes/typed/batch/v1beta1
-    certificatesv1: k8s.io/client-go/kubernetes/typed/certificates/v1
-    certificatesv1beta1: k8s.io/client-go/kubernetes/typed/certificates/v1beta1
-    coordinationv1: k8s.io/client-go/kubernetes/typed/coordination/v1
-    coordinationv1beta1: k8s.io/client-go/kubernetes/typed/coordination/v1beta1
-    corev1: k8s.io/api/core/v1
-    discovery: k8s.io/client-go/discovery
-    discoveryv1: k8s.io/client-go/kubernetes/typed/discovery/v1
-    discoveryv1beta1: k8s.io/client-go/kubernetes/typed/discovery/v1beta1
-    eventsv1: k8s.io/client-go/kubernetes/typed/events/v1
-    eventsv1beta1: k8s.io/client-go/kubernetes/typed/events/v1beta1
-    extensionsv1beta1: k8s.io/client-go/kubernetes/typed/extensions/v1beta1
-    flowcontrol: k8s.io/client-go/util/flowcontrol
-    flowcontrolv1alpha1: k8s.io/client-go/kubernetes/typed/flowcontrol/v1alpha1
-    flowcontrolv1beta1: k8s.io/client-go/kubernetes/typed/flowcontrol/v1beta1
-    internalv1alpha1: k8s.io/client-go/kubernetes/typed/apiserverinternal/v1alpha1
-    metav1: k8s.io/apimachinery/pkg/apis/meta/v1
-    networkingv1: k8s.io/client-go/kubernetes/typed/networking/v1
-    networkingv1beta1: k8s.io/client-go/kubernetes/typed/networking/v1beta1
-    nodev1: k8s.io/client-go/kubernetes/typed/node/v1
-    nodev1alpha1: k8s.io/client-go/kubernetes/typed/node/v1alpha1
-    nodev1beta1: k8s.io/client-go/kubernetes/typed/node/v1beta1
-    policyv1: k8s.io/client-go/kubernetes/typed/policy/v1
-    policyv1beta1: k8s.io/client-go/kubernetes/typed/policy/v1beta1
-    rbacv1: k8s.io/client-go/kubernetes/typed/rbac/v1
-    rbacv1alpha1: k8s.io/client-go/kubernetes/typed/rbac/v1alpha1
-    rbacv1beta1: k8s.io/client-go/kubernetes/typed/rbac/v1beta1
-    rest: k8s.io/client-go/rest
-    schedulingv1: k8s.io/client-go/kubernetes/typed/scheduling/v1
-    schedulingv1alpha1: k8s.io/client-go/kubernetes/typed/scheduling/v1alpha1
-    schedulingv1beta1: k8s.io/client-go/kubernetes/typed/scheduling/v1beta1
-    storagev1: k8s.io/client-go/kubernetes/typed/storage/v1
-    storagev1alpha1: k8s.io/client-go/kubernetes/typed/storage/v1alpha1
-    storagev1beta1: k8s.io/client-go/kubernetes/typed/storage/v1beta1
-    typedcorev1: k8s.io/client-go/kubernetes/typed/core/v1
+    no-unaliased: true
+    # These primarily come from clientset.go in k8s.io/client-go. Even the
+    # official Kubernetes codebase has conflicts, though.
+    alias:
+      - pkg: k8s.io/api/core/(v[\w\d]+)
+        alias: core$1
+
+      - pkg: k8s.io/apimachinery/pkg/apis/meta/(v[\w\d]+)
+        alias: meta$1
+
+      - pkg: k8s.io/client-go/kubernetes/typed/admissionregistration/(v[\w\d]+)
+        alias: admissionregistration$1
+      - pkg: k8s.io/client-go/kubernetes/typed/apps/(v[\w\d]+)
+        alias: apps$1
+      - pkg: k8s.io/client-go/kubernetes/typed/authentication/(v[\w\d]+)
+        alias: authentication$1
+      - pkg: k8s.io/client-go/kubernetes/typed/authorization/(v[\w\d]+)
+        alias: authorization$1
+      - pkg: k8s.io/client-go/kubernetes/typed/autoscaling/(v[\w\d]+)
+        alias: autoscaling$1
+      - pkg: k8s.io/client-go/kubernetes/typed/batch/(v[\w\d]+)
+        alias: batch$1
+      - pkg: k8s.io/client-go/kubernetes/typed/certificates/(v[\w\d]+)
+        alias: certificates$1
+      - pkg: k8s.io/client-go/kubernetes/typed/coordination/(v[\w\d]+)
+        alias: coordination$1
+      - pkg: k8s.io/client-go/kubernetes/typed/discovery/(v[\w\d]+)
+        alias: discovery$1
+      - pkg: k8s.io/client-go/kubernetes/typed/events/(v[\w\d]+)
+        alias: events$1
+      - pkg: k8s.io/client-go/kubernetes/typed/extensions/(v[\w\d]+)
+        alias: extensions$1
+      - pkg: k8s.io/client-go/kubernetes/typed/flowcontrol/(v[\w\d]+)
+        alias: flowcontrol$1
+      - pkg: k8s.io/client-go/kubernetes/typed/apiserverinternal/(v[\w\d]+)
+        alias: internal$1
+      - pkg: k8s.io/client-go/kubernetes/typed/networking/(v[\w\d]+)
+        alias: networking$1
+      - pkg: k8s.io/client-go/kubernetes/typed/node/(v[\w\d]+)
+        alias: node$1
+      - pkg: k8s.io/client-go/kubernetes/typed/policy/(v[\w\d]+)
+        alias: policy$1
+      - pkg: k8s.io/client-go/kubernetes/typed/rbac/(v[\w\d]+)
+        alias: rbac$1
+      - pkg: k8s.io/client-go/kubernetes/typed/scheduling/(v[\w\d]+)
+        alias: scheduling$1
+      - pkg: k8s.io/client-go/kubernetes/typed/storage/(v[\w\d]+)
+        alias: storage$1
+      - pkg: k8s.io/client-go/kubernetes/typed/core/(v[\w\d]+)
+        alias: typedcore$1
+
+      - pkg: k8s.io/metrics/pkg/apis/metrics/(v[\w\d]+)
+        alias: metrics$1
+
   revive:
     # see https://github.com/mgechev/revive#available-rules for details.
     ignore-generated-header: true
