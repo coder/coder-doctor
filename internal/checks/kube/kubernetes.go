@@ -5,8 +5,8 @@ import (
 	"io"
 
 	"github.com/Masterminds/semver/v3"
-	"k8s.io/client-go/kubernetes"
 	"golang.org/x/xerrors"
+	"k8s.io/client-go/kubernetes"
 
 	"cdr.dev/slog"
 	"cdr.dev/slog/sloggers/sloghuman"
