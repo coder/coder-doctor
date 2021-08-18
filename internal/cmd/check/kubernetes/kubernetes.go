@@ -19,7 +19,9 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth/openstack"
 	"k8s.io/client-go/tools/clientcmd"
 
+	"github.com/cdr/coder-doctor/internal/api"
 	"github.com/cdr/coder-doctor/internal/checks/kube"
+	"github.com/cdr/coder-doctor/internal/checks/local"
 	"github.com/cdr/coder-doctor/internal/humanwriter"
 )
 
@@ -120,15 +122,27 @@ func run(cmd *cobra.Command, _ []string) error {
 		slog.F("authinfo", rawConfig.Contexts[rawConfig.CurrentContext].AuthInfo),
 	)
 
-	checker := kube.NewKubernetesChecker(
+	hw := humanwriter.New(os.Stdout)
+
+	localChecker := local.NewChecker(
+		local.WithLogger(log),
+		local.WithCoderVersion(cv),
+		local.WithWriter(hw),
+		local.WithTarget(api.CheckTargetKubernetes),
+	)
+
+	kubeChecker := kube.NewKubernetesChecker(
 		clientset,
 		kube.WithLogger(log),
 		kube.WithCoderVersion(cv),
-		kube.WithWriter(humanwriter.New(os.Stdout)),
+		kube.WithWriter(hw),
 	)
 
-	err = checker.Run(cmd.Context())
-	if err != nil {
+	if err := localChecker.Run(cmd.Context()); err != nil {
+		return xerrors.Errorf("run local checker: %w", err)
+	}
+
+	if err := kubeChecker.Run(cmd.Context()); err != nil {
 		return xerrors.Errorf("run kube checker: %w", err)
 	}
 

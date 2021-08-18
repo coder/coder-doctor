@@ -119,3 +119,17 @@ type CheckResult struct {
 	Summary string                 `json:"summary"`
 	Details map[string]interface{} `json:"details,omitempty"`
 }
+
+// CheckTarget indicates the subject of a Checker
+type CheckTarget string
+
+const (
+	// CheckTargetUndefined indicates that a Checker does not run against any specific target.
+	CheckTargetUndefined CheckTarget = ""
+
+	// CheckTargetLocal indicates that a Checker runs against the local machine.
+	CheckTargetLocal CheckTarget = "local"
+
+	// CheckTargetKubernetes indicates that a Checker runs against a Kubernetes cluster.
+	CheckTargetKubernetes = "kubernetes"
+)
