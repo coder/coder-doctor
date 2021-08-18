@@ -75,9 +75,15 @@ func run(cmd *cobra.Command, _ []string) error {
 		return xerrors.Errorf("parse flags: %w", err)
 	}
 
-	config, err := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(loadingRules, overrides).ClientConfig()
+	configLoader := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(loadingRules, overrides)
+	config, err := configLoader.ClientConfig()
 	if err != nil {
 		return xerrors.Errorf("creating NonInteractiveDeferredLoadingClientConfig: %w", err)
+	}
+
+	rawConfig, err := configLoader.RawConfig()
+	if err != nil {
+		return xerrors.Errorf("creating RawConfig: %w", err)
 	}
 
 	clientset, err := kclient.NewForConfig(config)
@@ -106,6 +112,13 @@ func run(cmd *cobra.Command, _ []string) error {
 	if verbosity > 5 {
 		log = log.Leveled(slog.LevelDebug)
 	}
+
+	log.Info(cmd.Context(), "kubernetes config:",
+		slog.F("context", rawConfig.CurrentContext),
+		slog.F("cluster", rawConfig.Contexts[rawConfig.CurrentContext].Cluster),
+		slog.F("namespace", rawConfig.Contexts[rawConfig.CurrentContext].Namespace),
+		slog.F("authinfo", rawConfig.Contexts[rawConfig.CurrentContext].AuthInfo),
+	)
 
 	checker := kube.NewKubernetesChecker(
 		clientset,
