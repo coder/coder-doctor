@@ -17,6 +17,7 @@ import (
 var _ = api.Checker(&KubernetesChecker{})
 
 type KubernetesChecker struct {
+	namespace    string
 	client       kubernetes.Interface
 	writer       api.ResultWriter
 	coderVersion *semver.Version
@@ -27,9 +28,10 @@ type Option func(k *KubernetesChecker)
 
 func NewKubernetesChecker(client kubernetes.Interface, opts ...Option) *KubernetesChecker {
 	checker := &KubernetesChecker{
-		client: client,
-		log:    slog.Make(sloghuman.Sink(io.Discard)),
-		writer: &api.DiscardWriter{},
+		namespace: "default",
+		client:    client,
+		log:       slog.Make(sloghuman.Sink(io.Discard)),
+		writer:    &api.DiscardWriter{},
 		// Select the newest version by default
 		coderVersion: semver.MustParse("100.0.0"),
 	}
@@ -56,6 +58,12 @@ func WithCoderVersion(version *semver.Version) Option {
 func WithLogger(log slog.Logger) Option {
 	return func(k *KubernetesChecker) {
 		k.log = log
+	}
+}
+
+func WithNamespace(ns string) Option {
+	return func(k *KubernetesChecker) {
+		k.namespace = ns
 	}
 }
 
