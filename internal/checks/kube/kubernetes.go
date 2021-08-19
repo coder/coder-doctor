@@ -76,5 +76,11 @@ func (k *KubernetesChecker) Run(ctx context.Context) error {
 	if err != nil {
 		return xerrors.Errorf("check version: %w", err)
 	}
+
+	for _, res := range k.CheckRBAC(ctx) {
+		if err := k.writer.WriteResult(res); err != nil {
+			return xerrors.Errorf("check RBAC: %w", err)
+		}
+	}
 	return nil
 }
