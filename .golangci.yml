@@ -64,8 +64,10 @@ linters-settings:
         alias: apps$1
       - pkg: k8s.io/client-go/kubernetes/typed/authentication/(v[\w\d]+)
         alias: authentication$1
-      - pkg: k8s.io/client-go/kubernetes/typed/authorization/(v[\w\d]+)
+      - pkg: k8s.io/api/authorization/(v[\w\d]+)
         alias: authorization$1
+      - pkg: k8s.io/client-go/kubernetes/typed/authorization/(v[\w\d]+)
+        alias: authorization$1client
       - pkg: k8s.io/client-go/kubernetes/typed/autoscaling/(v[\w\d]+)
         alias: autoscaling$1
       - pkg: k8s.io/client-go/kubernetes/typed/batch/(v[\w\d]+)
