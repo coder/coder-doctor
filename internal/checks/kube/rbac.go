@@ -39,7 +39,6 @@ var rbacRequirements = []*RBACRequirement{
 	NewRBACRequirement("secrets", VerbsCreateDeleteList...),
 	NewRBACRequirement("services", VerbsCreateDeleteList...),
 	NewRBACRequirement("statefulsets", VerbsCreateDeleteList...),
-	NewRBACRequirement("flabbagabbas", VerbsCreateDeleteList...),
 }
 
 func (k *KubernetesChecker) CheckRBAC(ctx context.Context) []*api.CheckResult {
