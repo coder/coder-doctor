@@ -15,30 +15,32 @@ import (
 )
 
 type RBACRequirement struct {
+	APIGroup string
 	Resource string
 	Verbs    []string
 }
 
 var VerbsCreateDeleteList = []string{"create", "delete", "list"}
 
-func NewRBACRequirement(resource string, verbs ...string) *RBACRequirement {
+func NewRBACRequirement(apiGroup, resource string, verbs ...string) *RBACRequirement {
 	return &RBACRequirement{
+		APIGroup: apiGroup,
 		Resource: resource,
 		Verbs:    verbs,
 	}
 }
 
 var rbacRequirements = []*RBACRequirement{
-	NewRBACRequirement("deployments", VerbsCreateDeleteList...),
-	NewRBACRequirement("serviceaccounts", VerbsCreateDeleteList...),
-	NewRBACRequirement("replicasets", VerbsCreateDeleteList...),
-	NewRBACRequirement("pods", VerbsCreateDeleteList...),
-	NewRBACRequirement("roles", VerbsCreateDeleteList...),
-	NewRBACRequirement("rolebindings", VerbsCreateDeleteList...),
-	NewRBACRequirement("ingresses", VerbsCreateDeleteList...),
-	NewRBACRequirement("secrets", VerbsCreateDeleteList...),
-	NewRBACRequirement("services", VerbsCreateDeleteList...),
-	NewRBACRequirement("statefulsets", VerbsCreateDeleteList...),
+	NewRBACRequirement("", "pods", VerbsCreateDeleteList...),
+	NewRBACRequirement("", "roles", VerbsCreateDeleteList...),
+	NewRBACRequirement("", "rolebindings", VerbsCreateDeleteList...),
+	NewRBACRequirement("", "secrets", VerbsCreateDeleteList...),
+	NewRBACRequirement("", "serviceaccounts", VerbsCreateDeleteList...),
+	NewRBACRequirement("", "services", VerbsCreateDeleteList...),
+	NewRBACRequirement("apps", "deployments", VerbsCreateDeleteList...),
+	NewRBACRequirement("apps", "replicasets", VerbsCreateDeleteList...),
+	NewRBACRequirement("apps", "statefulsets", VerbsCreateDeleteList...),
+	NewRBACRequirement("extensions", "ingresses", VerbsCreateDeleteList...),
 }
 
 func (k *KubernetesChecker) CheckRBAC(ctx context.Context) []*api.CheckResult {
@@ -68,6 +70,7 @@ func (k *KubernetesChecker) checkOneRBAC(ctx context.Context, authClient authori
 			Spec: authorizationv1.SelfSubjectAccessReviewSpec{
 				ResourceAttributes: &authorizationv1.ResourceAttributes{
 					Namespace: k.namespace,
+					Group:     req.APIGroup,
 					Resource:  req.Resource,
 					Verb:      verb,
 				},
