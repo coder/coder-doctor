@@ -20,7 +20,7 @@ type RBACRequirement struct {
 	Verbs    []string
 }
 
-var VerbsCreateDeleteList = []string{"create", "delete", "list"}
+var verbsCreateDeleteList = []string{"create", "delete", "list"}
 
 func NewRBACRequirement(apiGroup, resource string, verbs ...string) *RBACRequirement {
 	return &RBACRequirement{
@@ -31,16 +31,16 @@ func NewRBACRequirement(apiGroup, resource string, verbs ...string) *RBACRequire
 }
 
 var rbacRequirements = []*RBACRequirement{
-	NewRBACRequirement("", "pods", VerbsCreateDeleteList...),
-	NewRBACRequirement("", "roles", VerbsCreateDeleteList...),
-	NewRBACRequirement("", "rolebindings", VerbsCreateDeleteList...),
-	NewRBACRequirement("", "secrets", VerbsCreateDeleteList...),
-	NewRBACRequirement("", "serviceaccounts", VerbsCreateDeleteList...),
-	NewRBACRequirement("", "services", VerbsCreateDeleteList...),
-	NewRBACRequirement("apps", "deployments", VerbsCreateDeleteList...),
-	NewRBACRequirement("apps", "replicasets", VerbsCreateDeleteList...),
-	NewRBACRequirement("apps", "statefulsets", VerbsCreateDeleteList...),
-	NewRBACRequirement("extensions", "ingresses", VerbsCreateDeleteList...),
+	NewRBACRequirement("", "pods", verbsCreateDeleteList...),
+	NewRBACRequirement("", "roles", verbsCreateDeleteList...),
+	NewRBACRequirement("", "rolebindings", verbsCreateDeleteList...),
+	NewRBACRequirement("", "secrets", verbsCreateDeleteList...),
+	NewRBACRequirement("", "serviceaccounts", verbsCreateDeleteList...),
+	NewRBACRequirement("", "services", verbsCreateDeleteList...),
+	NewRBACRequirement("apps", "deployments", verbsCreateDeleteList...),
+	NewRBACRequirement("apps", "replicasets", verbsCreateDeleteList...),
+	NewRBACRequirement("apps", "statefulsets", verbsCreateDeleteList...),
+	NewRBACRequirement("extensions", "ingresses", verbsCreateDeleteList...),
 }
 
 func (k *KubernetesChecker) CheckRBAC(ctx context.Context) []*api.CheckResult {
