@@ -115,13 +115,13 @@ func run(cmd *cobra.Command, _ []string) error {
 		log = log.Leveled(slog.LevelDebug)
 	}
 
-	cfgContext := rawConfig.Contexts[rawConfig.CurrentContext]
+	currentContext := rawConfig.Contexts[rawConfig.CurrentContext]
 
 	log.Info(cmd.Context(), "kubernetes config:",
 		slog.F("context", rawConfig.CurrentContext),
-		slog.F("cluster", cfgContext.Cluster),
-		slog.F("namespace", cfgContext.Namespace),
-		slog.F("authinfo", cfgContext.AuthInfo),
+		slog.F("cluster", currentContext.Cluster),
+		slog.F("namespace", currentContext.Namespace),
+		slog.F("authinfo", currentContext.AuthInfo),
 	)
 
 	hw := humanwriter.New(os.Stdout)
@@ -138,7 +138,7 @@ func run(cmd *cobra.Command, _ []string) error {
 		kube.WithLogger(log),
 		kube.WithCoderVersion(cv),
 		kube.WithWriter(hw),
-		kube.WithNamespace(cfgContext.Namespace),
+		kube.WithNamespace(currentContext.Namespace),
 	)
 
 	if err := localChecker.Run(cmd.Context()); err != nil {
