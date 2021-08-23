@@ -29,7 +29,7 @@ func Test_CheckRBAC(t *testing.T) {
 			Response: &selfSubjectAccessReviewAllowed,
 			F: func(t *testing.T, results []*api.CheckResult) {
 				for _, result := range results {
-					assert.Success(t, result.Name+" should not error", result.Details["error"].(error))
+					assert.True(t, result.Name+" should not error", result.Details["error"] == nil)
 					assert.True(t, result.Name+" should pass", result.State == api.StatePassed)
 				}
 			},
@@ -47,6 +47,7 @@ func Test_CheckRBAC(t *testing.T) {
 	}
 
 	for _, test := range tests {
+		test := test
 		t.Run(test.Name, func(t *testing.T) {
 			t.Parallel()
 
