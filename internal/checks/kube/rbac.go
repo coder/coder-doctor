@@ -11,7 +11,7 @@ import (
 
 	authorizationv1 "k8s.io/api/authorization/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	authorizationv1client "k8s.io/client-go/kubernetes/typed/authorization/v1" //nolint:importas
+	authorizationclientv1 "k8s.io/client-go/kubernetes/typed/authorization/v1"
 )
 
 type RBACRequirement struct {
@@ -61,7 +61,7 @@ func (k *KubernetesChecker) CheckRBAC(ctx context.Context) []*api.CheckResult {
 	return results
 }
 
-func (k *KubernetesChecker) checkOneRBAC(ctx context.Context, authClient authorizationv1client.AuthorizationV1Interface, req *RBACRequirement) error {
+func (k *KubernetesChecker) checkOneRBAC(ctx context.Context, authClient authorizationclientv1.AuthorizationV1Interface, req *RBACRequirement) error {
 	have := make([]string, 0, len(req.Verbs))
 	for _, verb := range req.Verbs {
 		sar := &authorizationv1.SelfSubjectAccessReview{
