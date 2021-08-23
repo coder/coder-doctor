@@ -7,6 +7,8 @@ import (
 
 	"golang.org/x/xerrors"
 
+	"github.com/Masterminds/semver/v3"
+
 	"github.com/cdr/coder-doctor/internal/api"
 
 	authorizationv1 "k8s.io/api/authorization/v1"
@@ -20,6 +22,11 @@ type RBACRequirement struct {
 	Verbs    []string
 }
 
+type VersionedRBACRequirements struct {
+	VersionConstraints *semver.Constraints
+	RBACRequirements   []*RBACRequirement
+}
+
 var verbsCreateDeleteList = []string{"create", "delete", "list"}
 
 func NewRBACRequirement(apiGroup, resource string, verbs ...string) *RBACRequirement {
@@ -30,25 +37,41 @@ func NewRBACRequirement(apiGroup, resource string, verbs ...string) *RBACRequire
 	}
 }
 
-var rbacRequirements = []*RBACRequirement{
-	NewRBACRequirement("", "pods", verbsCreateDeleteList...),
-	NewRBACRequirement("", "roles", verbsCreateDeleteList...),
-	NewRBACRequirement("", "rolebindings", verbsCreateDeleteList...),
-	NewRBACRequirement("", "secrets", verbsCreateDeleteList...),
-	NewRBACRequirement("", "serviceaccounts", verbsCreateDeleteList...),
-	NewRBACRequirement("", "services", verbsCreateDeleteList...),
-	NewRBACRequirement("apps", "deployments", verbsCreateDeleteList...),
-	NewRBACRequirement("apps", "replicasets", verbsCreateDeleteList...),
-	NewRBACRequirement("apps", "statefulsets", verbsCreateDeleteList...),
-	NewRBACRequirement("extensions", "ingresses", verbsCreateDeleteList...),
+var allVersionedRBACRequirements = []VersionedRBACRequirements{
+	{
+		VersionConstraints: api.MustConstraint(">= 1.20"),
+		RBACRequirements: []*RBACRequirement{
+			NewRBACRequirement("", "pods", verbsCreateDeleteList...),
+			NewRBACRequirement("", "roles", verbsCreateDeleteList...),
+			NewRBACRequirement("", "rolebindings", verbsCreateDeleteList...),
+			NewRBACRequirement("", "secrets", verbsCreateDeleteList...),
+			NewRBACRequirement("", "serviceaccounts", verbsCreateDeleteList...),
+			NewRBACRequirement("", "services", verbsCreateDeleteList...),
+			NewRBACRequirement("apps", "deployments", verbsCreateDeleteList...),
+			NewRBACRequirement("apps", "replicasets", verbsCreateDeleteList...),
+			NewRBACRequirement("apps", "statefulsets", verbsCreateDeleteList...),
+			NewRBACRequirement("extensions", "ingresses", verbsCreateDeleteList...),
+		},
+	},
 }
 
 func (k *KubernetesChecker) CheckRBAC(ctx context.Context) []*api.CheckResult {
 	const checkName = "kubernetes-rbac"
 	authClient := k.client.AuthorizationV1()
-	results := make([]*api.CheckResult, 0, len(rbacRequirements))
+	rbacReqs := findClosestVersionRequirements(k.coderVersion)
+	results := make([]*api.CheckResult, 0)
+	if rbacReqs == nil {
+		results = append(results,
+			api.ErrorResult(
+				checkName,
+				"unable to check RBAC requirements",
+				xerrors.Errorf("unhandled coder version: %s", k.coderVersion.String()),
+			),
+		)
+		return results
+	}
 
-	for _, req := range rbacRequirements {
+	for _, req := range rbacReqs.RBACRequirements {
 		resName := fmt.Sprintf("%s-%s", checkName, req.Resource)
 		if err := k.checkOneRBAC(ctx, authClient, req); err != nil {
 			summary := fmt.Sprintf("missing permissions on resource %s: %s", req.Resource, err)
@@ -94,5 +117,14 @@ func (k *KubernetesChecker) checkOneRBAC(ctx context.Context, authClient authori
 		return xerrors.Errorf(fmt.Sprintf("need: %+v have: %+v", req.Verbs, have))
 	}
 
+	return nil
+}
+
+func findClosestVersionRequirements(v *semver.Version) *VersionedRBACRequirements {
+	for _, vreqs := range allVersionedRBACRequirements {
+		if vreqs.VersionConstraints.Check(v) {
+			return &vreqs
+		}
+	}
 	return nil
 }
