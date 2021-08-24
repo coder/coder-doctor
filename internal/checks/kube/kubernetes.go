@@ -17,6 +17,7 @@ import (
 var _ = api.Checker(&KubernetesChecker{})
 
 type KubernetesChecker struct {
+	namespace    string
 	client       kubernetes.Interface
 	writer       api.ResultWriter
 	coderVersion *semver.Version
@@ -27,9 +28,10 @@ type Option func(k *KubernetesChecker)
 
 func NewKubernetesChecker(client kubernetes.Interface, opts ...Option) *KubernetesChecker {
 	checker := &KubernetesChecker{
-		client: client,
-		log:    slog.Make(sloghuman.Sink(io.Discard)),
-		writer: &api.DiscardWriter{},
+		namespace: "default",
+		client:    client,
+		log:       slog.Make(sloghuman.Sink(io.Discard)),
+		writer:    &api.DiscardWriter{},
 		// Select the newest version by default
 		coderVersion: semver.MustParse("100.0.0"),
 	}
@@ -59,6 +61,12 @@ func WithLogger(log slog.Logger) Option {
 	}
 }
 
+func WithNamespace(ns string) Option {
+	return func(k *KubernetesChecker) {
+		k.namespace = ns
+	}
+}
+
 func (*KubernetesChecker) Validate() error {
 	return nil
 }
@@ -67,6 +75,12 @@ func (k *KubernetesChecker) Run(ctx context.Context) error {
 	err := k.writer.WriteResult(k.CheckVersion(ctx))
 	if err != nil {
 		return xerrors.Errorf("check version: %w", err)
+	}
+
+	for _, res := range k.CheckRBAC(ctx) {
+		if err := k.writer.WriteResult(res); err != nil {
+			return xerrors.Errorf("check RBAC: %w", err)
+		}
 	}
 	return nil
 }
