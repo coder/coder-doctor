@@ -19,7 +19,9 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth/openstack"
 	"k8s.io/client-go/tools/clientcmd"
 
+	"github.com/cdr/coder-doctor/internal/api"
 	"github.com/cdr/coder-doctor/internal/checks/kube"
+	"github.com/cdr/coder-doctor/internal/checks/local"
 	"github.com/cdr/coder-doctor/internal/humanwriter"
 )
 
@@ -75,9 +77,15 @@ func run(cmd *cobra.Command, _ []string) error {
 		return xerrors.Errorf("parse flags: %w", err)
 	}
 
-	config, err := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(loadingRules, overrides).ClientConfig()
+	configLoader := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(loadingRules, overrides)
+	config, err := configLoader.ClientConfig()
 	if err != nil {
 		return xerrors.Errorf("creating NonInteractiveDeferredLoadingClientConfig: %w", err)
+	}
+
+	rawConfig, err := configLoader.RawConfig()
+	if err != nil {
+		return xerrors.Errorf("creating RawConfig: %w", err)
 	}
 
 	clientset, err := kclient.NewForConfig(config)
@@ -107,15 +115,34 @@ func run(cmd *cobra.Command, _ []string) error {
 		log = log.Leveled(slog.LevelDebug)
 	}
 
-	checker := kube.NewKubernetesChecker(
+	log.Info(cmd.Context(), "kubernetes config:",
+		slog.F("context", rawConfig.CurrentContext),
+		slog.F("cluster", rawConfig.Contexts[rawConfig.CurrentContext].Cluster),
+		slog.F("namespace", rawConfig.Contexts[rawConfig.CurrentContext].Namespace),
+		slog.F("authinfo", rawConfig.Contexts[rawConfig.CurrentContext].AuthInfo),
+	)
+
+	hw := humanwriter.New(os.Stdout)
+
+	localChecker := local.NewChecker(
+		local.WithLogger(log),
+		local.WithCoderVersion(cv),
+		local.WithWriter(hw),
+		local.WithTarget(api.CheckTargetKubernetes),
+	)
+
+	kubeChecker := kube.NewKubernetesChecker(
 		clientset,
 		kube.WithLogger(log),
 		kube.WithCoderVersion(cv),
-		kube.WithWriter(humanwriter.New(os.Stdout)),
+		kube.WithWriter(hw),
 	)
 
-	err = checker.Run(cmd.Context())
-	if err != nil {
+	if err := localChecker.Run(cmd.Context()); err != nil {
+		return xerrors.Errorf("run local checker: %w", err)
+	}
+
+	if err := kubeChecker.Run(cmd.Context()); err != nil {
 		return xerrors.Errorf("run kube checker: %w", err)
 	}
 
