@@ -127,18 +127,17 @@ func Test_CheckLocalHelmVersion(t *testing.T) {
 		}
 	})
 
-	run(t, "helm: coder version is unsupported", func(t *testing.T, p *params) {
+	run(t, "helm: someone did not call validate", func(t *testing.T, p *params) {
+		defer func() {
+			if r := recover(); r == nil {
+				t.Errorf("this code should have panicked")
+				t.FailNow()
+			}
+		}()
 		p.Opts = append(p.Opts, WithCoderVersion(semver.MustParse("v1.19")))
 		p.LP.Handle("helm", "/usr/local/bin/helm", nil)
 		p.EX.Handle("/usr/local/bin/helm version --short", []byte("v3.6.0+g7f2df64"), nil)
 		lc := NewChecker(p.Opts...)
-		err := lc.Run(p.Ctx)
-		assert.Success(t, "run local checker", err)
-		assert.False(t, "results should not be empty", p.W.Empty())
-		for _, res := range p.W.Get() {
-			if res.Name == LocalHelmVersionCheck {
-				assert.Equal(t, "should fail", api.StateFailed, res.State)
-			}
-		}
+		_ = lc.Run(p.Ctx)
 	})
 }

@@ -83,7 +83,11 @@ func WithLookPathF(f LookPathF) Option {
 	}
 }
 
-func (*Checker) Validate() error {
+func (l *Checker) Validate() error {
+	// Ensure we know the Helm version requirement for our Coder version.
+	if findNearestHelmVersion(l.coderVersion) == nil {
+		return xerrors.Errorf("unsupported coder version %s: compatible helm version not specified", l.coderVersion.String())
+	}
 	return nil
 }
 

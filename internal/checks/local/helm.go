@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/Masterminds/semver/v3"
+	"golang.org/x/xerrors"
 
 	"cdr.dev/slog"
 	"github.com/cdr/coder-doctor/internal/api"
@@ -52,7 +53,8 @@ func (l *Checker) CheckLocalHelmVersion(ctx context.Context) *api.CheckResult {
 
 	selectedVersion := findNearestHelmVersion(l.coderVersion)
 	if selectedVersion == nil {
-		return api.ErrorResult(LocalHelmVersionCheck, fmt.Sprintf("checking coder version %s not supported", l.coderVersion.String()), nil)
+		// If this happens, Validate() was not called properly.
+		panic(xerrors.Errorf("helm version was nil - did you forget to call validate?"))
 	}
 	l.log.Debug(ctx, "selected coder version", slog.F("requested", l.coderVersion), slog.F("selected", selectedVersion.Coder))
 
