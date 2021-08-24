@@ -141,8 +141,16 @@ func run(cmd *cobra.Command, _ []string) error {
 		kube.WithNamespace(currentContext.Namespace),
 	)
 
+	if err := localChecker.Validate(); err != nil {
+		return xerrors.Errorf("failed to validate local checks: %w", err)
+	}
+
 	if err := localChecker.Run(cmd.Context()); err != nil {
 		return xerrors.Errorf("run local checker: %w", err)
+	}
+
+	if err := kubeChecker.Validate(); err != nil {
+		return xerrors.Errorf("failed to validate kube checker: %w", err)
 	}
 
 	if err := kubeChecker.Run(cmd.Context()); err != nil {

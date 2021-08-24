@@ -13,8 +13,6 @@ import (
 
 	"cdr.dev/slog/sloggers/slogtest/assert"
 
-	"github.com/Masterminds/semver/v3"
-
 	"github.com/cdr/coder-doctor/internal/api"
 )
 
@@ -87,27 +85,6 @@ func Test_CheckRBAC_ClientError(t *testing.T) {
 	results := checker.CheckRBAC(context.Background())
 	for _, result := range results {
 		assert.ErrorContains(t, result.Name+" should show correct error", result.Details["error"].(error), "failed to create SelfSubjectAccessReview request")
-		assert.True(t, result.Name+" should fail", result.State == api.StateFailed)
-	}
-}
-
-func Test_CheckRBAC_UnknownCoderVerseion(t *testing.T) {
-	t.Parallel()
-
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusInternalServerError)
-	}))
-	defer server.Close()
-
-	client, err := kubernetes.NewForConfig(&rest.Config{Host: server.URL})
-	assert.Success(t, "failed to create client", err)
-
-	checker := NewKubernetesChecker(client, WithCoderVersion(semver.MustParse("0.0.1")))
-
-	results := checker.CheckRBAC(context.Background())
-	for _, result := range results {
-		assert.ErrorContains(t, result.Name+" should show correct error", result.Details["error"].(error), "unhandled coder version")
 		assert.True(t, result.Name+" should fail", result.State == api.StateFailed)
 	}
 }

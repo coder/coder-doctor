@@ -58,20 +58,9 @@ var allVersionedRBACRequirements = []VersionedRBACRequirements{
 func (k *KubernetesChecker) CheckRBAC(ctx context.Context) []*api.CheckResult {
 	const checkName = "kubernetes-rbac"
 	authClient := k.client.AuthorizationV1()
-	rbacReqs := findClosestVersionRequirements(k.coderVersion)
 	results := make([]*api.CheckResult, 0)
-	if rbacReqs == nil {
-		results = append(results,
-			api.ErrorResult(
-				checkName,
-				"unable to check RBAC requirements",
-				xerrors.Errorf("unhandled coder version: %s", k.coderVersion.String()),
-			),
-		)
-		return results
-	}
 
-	for _, req := range rbacReqs.RBACRequirements {
+	for _, req := range k.rbacRequirements {
 		resName := fmt.Sprintf("%s-%s", checkName, req.Resource)
 		if err := k.checkOneRBAC(ctx, authClient, req); err != nil {
 			summary := fmt.Sprintf("missing permissions on resource %s: %s", req.Resource, err)
@@ -120,10 +109,10 @@ func (k *KubernetesChecker) checkOneRBAC(ctx context.Context, authClient authori
 	return nil
 }
 
-func findClosestVersionRequirements(v *semver.Version) *VersionedRBACRequirements {
+func findClosestVersionRequirements(v *semver.Version) []*RBACRequirement {
 	for _, vreqs := range allVersionedRBACRequirements {
 		if vreqs.VersionConstraints.Check(v) {
-			return &vreqs
+			return vreqs.RBACRequirements
 		}
 	}
 	return nil
