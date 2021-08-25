@@ -41,9 +41,11 @@ func NewKubernetesChecker(client kubernetes.Interface, opts ...Option) *Kubernet
 		opt(checker)
 	}
 
-	// This may be nil. It is the responsibility of the caller to run
-	// KubernetesChecker.Validate() before Run().
 	checker.rbacRequirements = findClosestVersionRequirements(checker.coderVersion)
+
+	if err := checker.Validate(); err != nil {
+		panic(xerrors.Errorf("error validating kube checker: %w", err))
+	}
 
 	return checker
 }
