@@ -2,9 +2,7 @@ package kube
 
 import (
 	"context"
-	"encoding/json"
 	"net/http"
-	"net/http/httptest"
 	"testing"
 
 	"github.com/Masterminds/semver/v3"
@@ -102,12 +100,7 @@ func TestVersions(t *testing.T) {
 		t.Run(test.Name, func(t *testing.T) {
 			t.Parallel()
 
-			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-				w.Header().Set("Content-Type", "application/json")
-				w.WriteHeader(http.StatusOK)
-				err := json.NewEncoder(w).Encode(test.KubernetesVersion)
-				assert.Success(t, "failed to encode response", err)
-			}))
+			server := newTestHTTPServer(t, http.StatusOK, test.KubernetesVersion)
 			defer server.Close()
 
 			client, err := kubernetes.NewForConfig(&rest.Config{
@@ -125,10 +118,7 @@ func TestVersions(t *testing.T) {
 func TestUnknownRoute(t *testing.T) {
 	t.Parallel()
 
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusNotFound)
-	}))
+	server := newTestHTTPServer(t, http.StatusNotFound, nil)
 	defer server.Close()
 
 	client, err := kubernetes.NewForConfig(&rest.Config{
@@ -145,14 +135,8 @@ func TestUnknownRoute(t *testing.T) {
 func TestCorruptResponse(t *testing.T) {
 	t.Parallel()
 
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		err := json.NewEncoder(w).Encode(map[string]interface{}{
-			"gitVersion": 10,
-		})
-		assert.Success(t, "failed to encode response", err)
-	}))
+	garbage := map[string]interface{}{"gitVersion": 10}
+	server := newTestHTTPServer(t, http.StatusOK, garbage)
 	defer server.Close()
 
 	client, err := kubernetes.NewForConfig(&rest.Config{
