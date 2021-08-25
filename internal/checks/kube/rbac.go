@@ -16,45 +16,6 @@ import (
 	authorizationclientv1 "k8s.io/client-go/kubernetes/typed/authorization/v1"
 )
 
-type RBACRequirement struct {
-	APIGroup string
-	Resource string
-	Verbs    []string
-}
-
-type VersionedRBACRequirements struct {
-	VersionConstraints *semver.Constraints
-	RBACRequirements   []*RBACRequirement
-}
-
-var verbsCreateDeleteList = []string{"create", "delete", "list"}
-
-func NewRBACRequirement(apiGroup, resource string, verbs ...string) *RBACRequirement {
-	return &RBACRequirement{
-		APIGroup: apiGroup,
-		Resource: resource,
-		Verbs:    verbs,
-	}
-}
-
-var allVersionedRBACRequirements = []VersionedRBACRequirements{
-	{
-		VersionConstraints: api.MustConstraint(">= 1.20"),
-		RBACRequirements: []*RBACRequirement{
-			NewRBACRequirement("", "pods", verbsCreateDeleteList...),
-			NewRBACRequirement("", "roles", verbsCreateDeleteList...),
-			NewRBACRequirement("", "rolebindings", verbsCreateDeleteList...),
-			NewRBACRequirement("", "secrets", verbsCreateDeleteList...),
-			NewRBACRequirement("", "serviceaccounts", verbsCreateDeleteList...),
-			NewRBACRequirement("", "services", verbsCreateDeleteList...),
-			NewRBACRequirement("apps", "deployments", verbsCreateDeleteList...),
-			NewRBACRequirement("apps", "replicasets", verbsCreateDeleteList...),
-			NewRBACRequirement("apps", "statefulsets", verbsCreateDeleteList...),
-			NewRBACRequirement("extensions", "ingresses", verbsCreateDeleteList...),
-		},
-	},
-}
-
 func (k *KubernetesChecker) CheckRBAC(ctx context.Context) []*api.CheckResult {
 	const checkName = "kubernetes-rbac"
 	authClient := k.client.AuthorizationV1()
@@ -75,7 +36,7 @@ func (k *KubernetesChecker) CheckRBAC(ctx context.Context) []*api.CheckResult {
 	return results
 }
 
-func (k *KubernetesChecker) checkOneRBAC(ctx context.Context, authClient authorizationclientv1.AuthorizationV1Interface, req *RBACRequirement) error {
+func (k *KubernetesChecker) checkOneRBAC(ctx context.Context, authClient authorizationclientv1.AuthorizationV1Interface, req *ResourceRequirement) error {
 	have := make([]string, 0, len(req.Verbs))
 	for _, verb := range req.Verbs {
 		sar := &authorizationv1.SelfSubjectAccessReview{
@@ -109,7 +70,7 @@ func (k *KubernetesChecker) checkOneRBAC(ctx context.Context, authClient authori
 	return nil
 }
 
-func findClosestVersionRequirements(v *semver.Version) []*RBACRequirement {
+func findClosestVersionRequirements(v *semver.Version) []*ResourceRequirement {
 	for _, vreqs := range allVersionedRBACRequirements {
 		if vreqs.VersionConstraints.Check(v) {
 			return vreqs.RBACRequirements

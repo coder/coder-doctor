@@ -22,7 +22,7 @@ type KubernetesChecker struct {
 	writer           api.ResultWriter
 	coderVersion     *semver.Version
 	log              slog.Logger
-	rbacRequirements []*RBACRequirement
+	rbacRequirements []*ResourceRequirement
 }
 
 type Option func(k *KubernetesChecker)
