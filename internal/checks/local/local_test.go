@@ -4,7 +4,32 @@ import (
 	"context"
 	"strings"
 	"testing"
+
+	"cdr.dev/slog/sloggers/slogtest/assert"
+
+	"github.com/Masterminds/semver/v3"
 )
+
+func Test_LocalChecker_Validate(t *testing.T) {
+	t.Parallel()
+
+	t.Run("successful validation", func(t *testing.T) {
+		lc := NewChecker()
+		assert.Success(t, "local checker with defaults should be successful", lc.Validate())
+	})
+
+	t.Run("validation failed: unsupported coder version", func(t *testing.T) {
+		defer func() {
+			r := recover()
+			if r == nil {
+				t.Errorf("expected a panic")
+				t.FailNow()
+			}
+			assert.ErrorContains(t, "KubernetesChecker with unknown version should fail to validate", r.(error), "unhandled coder version")
+		}()
+		_ = NewChecker(WithCoderVersion(semver.MustParse("0.0.1")))
+	})
+}
 
 type execResult struct {
 	Output []byte

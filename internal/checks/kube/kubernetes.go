@@ -17,11 +17,12 @@ import (
 var _ = api.Checker(&KubernetesChecker{})
 
 type KubernetesChecker struct {
-	namespace    string
-	client       kubernetes.Interface
-	writer       api.ResultWriter
-	coderVersion *semver.Version
-	log          slog.Logger
+	namespace        string
+	client           kubernetes.Interface
+	writer           api.ResultWriter
+	coderVersion     *semver.Version
+	log              slog.Logger
+	rbacRequirements []*RBACRequirement
 }
 
 type Option func(k *KubernetesChecker)
@@ -38,6 +39,12 @@ func NewKubernetesChecker(client kubernetes.Interface, opts ...Option) *Kubernet
 
 	for _, opt := range opts {
 		opt(checker)
+	}
+
+	checker.rbacRequirements = findClosestVersionRequirements(checker.coderVersion)
+
+	if err := checker.Validate(); err != nil {
+		panic(xerrors.Errorf("error validating kube checker: %w", err))
 	}
 
 	return checker
@@ -67,7 +74,10 @@ func WithNamespace(ns string) Option {
 	}
 }
 
-func (*KubernetesChecker) Validate() error {
+func (k *KubernetesChecker) Validate() error {
+	if k.rbacRequirements == nil {
+		return xerrors.Errorf("unhandled coder version: %s", k.coderVersion.String())
+	}
 	return nil
 }
 

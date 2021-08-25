@@ -44,6 +44,10 @@ func NewChecker(opts ...Option) *Checker {
 		opt(checker)
 	}
 
+	if err := checker.Validate(); err != nil {
+		panic(xerrors.Errorf("error validating local checker: %w", err))
+	}
+
 	return checker
 }
 
@@ -83,7 +87,11 @@ func WithLookPathF(f LookPathF) Option {
 	}
 }
 
-func (*Checker) Validate() error {
+func (l *Checker) Validate() error {
+	// Ensure we know the Helm version requirement for our Coder version.
+	if findNearestHelmVersion(l.coderVersion) == nil {
+		return xerrors.Errorf("unhandled coder version %s: compatible helm version not specified", l.coderVersion.String())
+	}
 	return nil
 }
 

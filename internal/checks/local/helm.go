@@ -51,9 +51,6 @@ func (l *Checker) CheckLocalHelmVersion(ctx context.Context) *api.CheckResult {
 	}
 
 	selectedVersion := findNearestHelmVersion(l.coderVersion)
-	if selectedVersion == nil {
-		return api.ErrorResult(LocalHelmVersionCheck, fmt.Sprintf("checking coder version %s not supported", l.coderVersion.String()), nil)
-	}
 	l.log.Debug(ctx, "selected coder version", slog.F("requested", l.coderVersion), slog.F("selected", selectedVersion.Coder))
 
 	result := &api.CheckResult{
