@@ -2,9 +2,7 @@ package kube
 
 import (
 	"context"
-	"encoding/json"
 	"net/http"
-	"net/http/httptest"
 	"testing"
 
 	authorizationv1 "k8s.io/api/authorization/v1"
@@ -28,6 +26,7 @@ func Test_CheckRBAC(t *testing.T) {
 			Name:     "all allowed",
 			Response: &selfSubjectAccessReviewAllowed,
 			F: func(t *testing.T, results []*api.CheckResult) {
+				assert.False(t, "results should not be empty", len(results) == 0)
 				for _, result := range results {
 					assert.True(t, result.Name+" should not error", result.Details["error"] == nil)
 					assert.True(t, result.Name+" should pass", result.State == api.StatePassed)
@@ -38,6 +37,7 @@ func Test_CheckRBAC(t *testing.T) {
 			Name:     "all denied",
 			Response: &selfSubjectAccessReviewDenied,
 			F: func(t *testing.T, results []*api.CheckResult) {
+				assert.False(t, "results should not be empty", len(results) == 0)
 				for _, result := range results {
 					assert.True(t, result.Name+" should have an error", result.Details["error"] != nil)
 					assert.True(t, result.Name+" should fail", result.State == api.StateFailed)
@@ -51,12 +51,7 @@ func Test_CheckRBAC(t *testing.T) {
 		t.Run(test.Name, func(t *testing.T) {
 			t.Parallel()
 
-			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-				w.Header().Set("Content-Type", "application/json")
-				w.WriteHeader(http.StatusOK)
-				err := json.NewEncoder(w).Encode(test.Response)
-				assert.Success(t, "failed to encode response", err)
-			}))
+			server := newTestHTTPServer(t, http.StatusOK, test.Response)
 			defer server.Close()
 
 			client, err := kubernetes.NewForConfig(&rest.Config{Host: server.URL})
@@ -72,11 +67,7 @@ func Test_CheckRBAC(t *testing.T) {
 func Test_CheckRBAC_ClientError(t *testing.T) {
 	t.Parallel()
 
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusInternalServerError)
-	}))
-	defer server.Close()
+	server := newTestHTTPServer(t, http.StatusInternalServerError, nil)
 
 	client, err := kubernetes.NewForConfig(&rest.Config{Host: server.URL})
 	assert.Success(t, "failed to create client", err)
