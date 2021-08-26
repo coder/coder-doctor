@@ -10,16 +10,16 @@ var allRequirements = []VersionedResourceRequirements{
 	{
 		VersionConstraints: api.MustConstraint(">= 1.20"),
 		ResourceRequirements: map[*ResourceRequirement]ResourceVerbs{
-			NewResourceRequirement("", "v1", "pods"):                                   verbsCreateDeleteList,
-			NewResourceRequirement("", "v1", "secrets"):                                verbsCreateDeleteList,
-			NewResourceRequirement("", "v1", "serviceaccounts"):                        verbsCreateDeleteList,
-			NewResourceRequirement("", "v1", "services"):                               verbsCreateDeleteList,
-			NewResourceRequirement("", "rbac.authorization.k8s.io/v1", "roles"):        verbsCreateDeleteList,
-			NewResourceRequirement("", "rbac.authorization.k8s.io/v1", "rolebindings"): verbsCreateDeleteList,
-			NewResourceRequirement("apps", "apps/v1", "deployments"):                   verbsCreateDeleteList,
-			NewResourceRequirement("apps", "apps/v1", "replicasets"):                   verbsCreateDeleteList,
-			NewResourceRequirement("apps", "apps/v1", "statefulsets"):                  verbsCreateDeleteList,
-			NewResourceRequirement("extensions", "ingresses", "networking.k8s.io/v1"):  verbsCreateDeleteList,
+			NewResourceRequirement("", "v1", "pods"):                                                            verbsCreateDeleteList,
+			NewResourceRequirement("", "v1", "secrets"):                                                         verbsCreateDeleteList,
+			NewResourceRequirement("", "v1", "serviceaccounts"):                                                 verbsCreateDeleteList,
+			NewResourceRequirement("", "v1", "services"):                                                        verbsCreateDeleteList,
+			NewResourceRequirement("apps", "apps/v1", "deployments"):                                            verbsCreateDeleteList,
+			NewResourceRequirement("apps", "apps/v1", "replicasets"):                                            verbsCreateDeleteList,
+			NewResourceRequirement("apps", "apps/v1", "statefulsets"):                                           verbsCreateDeleteList,
+			NewResourceRequirement("networking.k8s.io", "networking.k8s.io/v1", "ingresses"):                    verbsCreateDeleteList,
+			NewResourceRequirement("rbac.authorization.k8s.io", "rbac.authorization.k8s.io/v1", "roles"):        verbsCreateDeleteList,
+			NewResourceRequirement("rbac.authorization.k8s.io", "rbac.authorization.k8s.io/v1", "rolebindings"): verbsCreateDeleteList,
 		},
 	},
 }
@@ -37,8 +37,8 @@ type ResourceVerbs []string
 
 // VersionedResourceRequirements is a set of ResourceRequirements for a specific version of Coder.
 type VersionedResourceRequirements struct {
-	VersionConstraints *semver.Constraints
-	ResourceRequirements   map[*ResourceRequirement]ResourceVerbs
+	VersionConstraints   *semver.Constraints
+	ResourceRequirements map[*ResourceRequirement]ResourceVerbs
 }
 
 var verbsCreateDeleteList ResourceVerbs = []string{"create", "delete", "list"}
