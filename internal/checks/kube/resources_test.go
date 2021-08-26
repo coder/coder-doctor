@@ -18,7 +18,7 @@ func Test_KubernetesChecker_CheckResources(t *testing.T) {
 
 	tests := []struct {
 		Name     string
-		Response []*metav1.APIResourceList
+		Response *metav1.APIResourceList
 		F        func(*testing.T, []*api.CheckResult)
 	}{
 		{
@@ -54,4 +54,8 @@ func Test_KubernetesChecker_CheckResources(t *testing.T) {
 	}
 }
 
-var emptyAPIResourceList []*metav1.APIResourceList = []*metav1.APIResourceList{}
+var emptyAPIResourceList *metav1.APIResourceList = &metav1.APIResourceList{
+	TypeMeta:     metav1.TypeMeta{},
+	GroupVersion: "",
+	APIResources: []metav1.APIResource{},
+}
