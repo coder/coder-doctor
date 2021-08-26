@@ -21,29 +21,29 @@ func (k *KubernetesChecker) CheckRBAC(ctx context.Context) []*api.CheckResult {
 	authClient := k.client.AuthorizationV1()
 	results := make([]*api.CheckResult, 0)
 
-	for _, req := range k.rbacRequirements {
+	for req, reqVerbs := range k.rbacRequirements {
 		resName := fmt.Sprintf("%s-%s", checkName, req.Resource)
-		if err := k.checkOneRBAC(ctx, authClient, req); err != nil {
+		if err := k.checkOneRBAC(ctx, authClient, req, reqVerbs); err != nil {
 			summary := fmt.Sprintf("missing permissions on resource %s: %s", req.Resource, err)
 			results = append(results, api.ErrorResult(resName, summary, err))
 			continue
 		}
 
-		summary := fmt.Sprintf("%s: can %s", req.Resource, strings.Join(req.Verbs, ", "))
+		summary := fmt.Sprintf("%s: can %s", req.Resource, strings.Join(reqVerbs, ", "))
 		results = append(results, api.PassResult(resName, summary))
 	}
 
 	return results
 }
 
-func (k *KubernetesChecker) checkOneRBAC(ctx context.Context, authClient authorizationclientv1.AuthorizationV1Interface, req *ResourceRequirement) error {
-	have := make([]string, 0, len(req.Verbs))
-	for _, verb := range req.Verbs {
+func (k *KubernetesChecker) checkOneRBAC(ctx context.Context, authClient authorizationclientv1.AuthorizationV1Interface, req *ResourceRequirement, reqVerbs ResourceVerbs) error {
+	have := make([]string, 0, len(reqVerbs))
+	for _, verb := range reqVerbs {
 		sar := &authorizationv1.SelfSubjectAccessReview{
 			Spec: authorizationv1.SelfSubjectAccessReviewSpec{
 				ResourceAttributes: &authorizationv1.ResourceAttributes{
 					Namespace: k.namespace,
-					Group:     req.APIGroup,
+					Group:     req.Group,
 					Resource:  req.Resource,
 					Verb:      verb,
 				},
@@ -63,17 +63,17 @@ func (k *KubernetesChecker) checkOneRBAC(ctx context.Context, authClient authori
 		}
 	}
 
-	if len(have) != len(req.Verbs) {
-		return xerrors.Errorf(fmt.Sprintf("need: %+v have: %+v", req.Verbs, have))
+	if len(have) != len(reqVerbs) {
+		return xerrors.Errorf(fmt.Sprintf("need: %+v have: %+v", reqVerbs, have))
 	}
 
 	return nil
 }
 
-func findClosestVersionRequirements(v *semver.Version) []*ResourceRequirement {
-	for _, vreqs := range allVersionedRBACRequirements {
+func findClosestVersionRequirements(v *semver.Version) map[*ResourceRequirement]ResourceVerbs {
+	for _, vreqs := range allRequirements {
 		if vreqs.VersionConstraints.Check(v) {
-			return vreqs.RBACRequirements
+			return vreqs.ResourceRequirements
 		}
 	}
 	return nil
