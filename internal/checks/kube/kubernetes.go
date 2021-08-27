@@ -22,7 +22,7 @@ type KubernetesChecker struct {
 	writer           api.ResultWriter
 	coderVersion     *semver.Version
 	log              slog.Logger
-	rbacRequirements []*RBACRequirement
+	rbacRequirements map[*ResourceRequirement]ResourceVerbs
 }
 
 type Option func(k *KubernetesChecker)
@@ -85,6 +85,12 @@ func (k *KubernetesChecker) Run(ctx context.Context) error {
 	err := k.writer.WriteResult(k.CheckVersion(ctx))
 	if err != nil {
 		return xerrors.Errorf("check version: %w", err)
+	}
+
+	for _, res := range k.CheckResources(ctx) {
+		if err := k.writer.WriteResult(res); err != nil {
+			return xerrors.Errorf("check api resources: %w", err)
+		}
 	}
 
 	for _, res := range k.CheckRBAC(ctx) {
