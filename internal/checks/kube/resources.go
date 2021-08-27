@@ -45,8 +45,7 @@ func (k *KubernetesChecker) CheckResources(_ context.Context) []*api.CheckResult
 		}
 	}
 
-	versionReqs := findClosestVersionRequirements(k.coderVersion)
-	for versionReq := range versionReqs {
+	for versionReq := range k.reqs.ResourceRequirements {
 		if !resourcesAvailable[*versionReq] {
 			msg := fmt.Sprintf("missing required resource:%q group:%q version:%q", versionReq.Resource, versionReq.Group, versionReq.Version)
 			errResult := api.ErrorResult(checkName, msg, xerrors.New(msg))

@@ -69,6 +69,10 @@ func Test_KubernetesChecker_CheckResources(t *testing.T) {
 					w.WriteHeader(http.StatusOK)
 					err := json.NewEncoder(w).Encode(appsV1ResourceList)
 					assert.Success(t, "failed to encode response", err)
+				case "/apis/metrics.k8s.io/v1":
+					w.WriteHeader(http.StatusOK)
+					err := json.NewEncoder(w).Encode(metricsV1ResourceLilst)
+					assert.Success(t, "failed to encode response", err)
 				case "/apis/networking.k8s.io/v1":
 					w.WriteHeader(http.StatusOK)
 					err := json.NewEncoder(w).Encode(networkingV1ResourceList)
@@ -76,6 +80,10 @@ func Test_KubernetesChecker_CheckResources(t *testing.T) {
 				case "/apis/rbac.authorization.k8s.io/v1":
 					w.WriteHeader(http.StatusOK)
 					err := json.NewEncoder(w).Encode(rbacV1ResourceList)
+					assert.Success(t, "failed to encode response", err)
+				case "/apis/storage.k8s.io/v1":
+					w.WriteHeader(http.StatusOK)
+					err := json.NewEncoder(w).Encode(storageV1ResourceList)
 					assert.Success(t, "failed to encode response", err)
 				default:
 					w.WriteHeader(http.StatusNotFound)
@@ -125,6 +133,15 @@ var fullAPIGroupList *metav1.APIGroupList = &metav1.APIGroupList{
 			},
 		},
 		{
+			Name: "metrics.k8s.io",
+			Versions: []metav1.GroupVersionForDiscovery{
+				{
+					GroupVersion: "metrics.k8s.io/v1beta1",
+					Version:      "v1",
+				},
+			},
+		},
+		{
 			Name: "networking.k8s.io",
 			Versions: []metav1.GroupVersionForDiscovery{
 				{
@@ -142,84 +159,36 @@ var fullAPIGroupList *metav1.APIGroupList = &metav1.APIGroupList{
 				},
 			},
 		},
-	},
-}
-
-var v1ResourceList = &metav1.APIResourceList{
-	TypeMeta: metav1.TypeMeta{
-		Kind: "APIResourceList",
-	},
-	GroupVersion: "v1",
-	APIResources: []metav1.APIResource{
 		{
-			Name:  "pods",
-			Verbs: []string{"get"},
-		},
-		{
-			Name:  "secrets",
-			Verbs: []string{"get"},
-		},
-		{
-			Name:  "serviceaccounts",
-			Verbs: []string{"get"},
-		},
-		{
-			Name:  "services",
-			Verbs: []string{"get"},
+			Name: "storage.k8s.io",
+			Versions: []metav1.GroupVersionForDiscovery{
+				{
+					GroupVersion: "storage.k8s.io/v1",
+					Version:      "v1",
+				},
+			},
 		},
 	},
 }
 
-var appsV1ResourceList = &metav1.APIResourceList{
-	TypeMeta: metav1.TypeMeta{
-		Kind:       "APIResourceList",
-		APIVersion: "v1",
-	},
-	GroupVersion: "apps/v1",
-	APIResources: []metav1.APIResource{
-		{
-			Name:  "deployments",
-			Verbs: []string{"get"},
-		},
-		{
-			Name:  "replicasets",
-			Verbs: []string{"get"},
-		},
-		{
-			Name:  "statefulsets",
-			Verbs: []string{"get"},
-		},
-	},
-}
+var v1ResourceList = makeResourceList("", "v1", "persistentvolumes", "persistentvolumeclaims", "events", "pods", "secrets", "serviceaccounts", "services")
+var appsV1ResourceList = makeResourceList("v1", "apps/v1", "deployments", "replicasets", "statefulsets")
+var metricsV1ResourceLilst = makeResourceList("v1", "metrics.k8s.io/v1beta1", "pods")
+var networkingV1ResourceList = makeResourceList("v1", "networking.k8s.io/v1", "ingresses", "networkpolicies")
+var rbacV1ResourceList = makeResourceList("v1", "rbac.authorization.k8s.io/v1", "roles", "rolebindings")
+var storageV1ResourceList = makeResourceList("v1", "storage.k8s.io/v1", "roles", "storageclasses")
 
-var networkingV1ResourceList = &metav1.APIResourceList{
-	TypeMeta: metav1.TypeMeta{
-		Kind:       "APIResourceList",
-		APIVersion: "v1",
-	},
-	GroupVersion: "networking.k8s.io/v1",
-	APIResources: []metav1.APIResource{
-		{
-			Name:  "ingresses",
-			Verbs: []string{"get"},
+func makeResourceList(version, groupVersion string, resources ...string) *metav1.APIResourceList {
+	rl := &metav1.APIResourceList{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "APIResourceList",
+			APIVersion: version,
 		},
-	},
-}
-
-var rbacV1ResourceList = &metav1.APIResourceList{
-	TypeMeta: metav1.TypeMeta{
-		Kind:       "APIResourceList",
-		APIVersion: "v1",
-	},
-	GroupVersion: "rbac.authorization.k8s.io/v1",
-	APIResources: []metav1.APIResource{
-		{
-			Name:  "roles",
-			Verbs: []string{"get"},
-		},
-		{
-			Name:  "rolebindings",
-			Verbs: []string{"get"},
-		},
-	},
+		GroupVersion: groupVersion,
+		APIResources: []metav1.APIResource{},
+	}
+	for _, resource := range resources {
+		rl.APIResources = append(rl.APIResources, metav1.APIResource{Name: resource, Verbs: []string{"get"}})
+	}
+	return rl
 }
