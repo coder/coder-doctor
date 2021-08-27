@@ -21,7 +21,21 @@ func (k *KubernetesChecker) CheckRBAC(ctx context.Context) []*api.CheckResult {
 	authClient := k.client.AuthorizationV1()
 	results := make([]*api.CheckResult, 0)
 
-	for req, reqVerbs := range k.rbacRequirements {
+	for req, reqVerbs := range k.reqs.ResourceRequirements {
+		resName := fmt.Sprintf("%s-%s", checkName, req.Resource)
+		if err := k.checkOneRBAC(ctx, authClient, req, reqVerbs); err != nil {
+			summary := fmt.Sprintf("missing permissions on resource %s: %s", req.Resource, err)
+			results = append(results, api.ErrorResult(resName, summary, err))
+			continue
+		}
+
+		summary := fmt.Sprintf("%s: can %s", req.Resource, strings.Join(reqVerbs, ", "))
+		results = append(results, api.PassResult(resName, summary))
+	}
+
+	// TODO: delete this when the enterprise-helm role no longer requests resources on things
+	// that don't exist.
+	for req, reqVerbs := range k.reqs.RoleOnlyResourceRequirements {
 		resName := fmt.Sprintf("%s-%s", checkName, req.Resource)
 		if err := k.checkOneRBAC(ctx, authClient, req, reqVerbs); err != nil {
 			summary := fmt.Sprintf("missing permissions on resource %s: %s", req.Resource, err)
@@ -70,10 +84,10 @@ func (k *KubernetesChecker) checkOneRBAC(ctx context.Context, authClient authori
 	return nil
 }
 
-func findClosestVersionRequirements(v *semver.Version) map[*ResourceRequirement]ResourceVerbs {
+func findClosestVersionRequirements(v *semver.Version) *VersionedResourceRequirements {
 	for _, vreqs := range allRequirements {
 		if vreqs.VersionConstraints.Check(v) {
-			return vreqs.ResourceRequirements
+			return &vreqs
 		}
 	}
 	return nil
