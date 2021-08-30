@@ -116,6 +116,9 @@ func run(cmd *cobra.Command, _ []string) error {
 	}
 
 	currentContext := rawConfig.Contexts[rawConfig.CurrentContext]
+	if currentContext.Namespace == "" {
+		currentContext.Namespace = "default"
+	}
 
 	log.Info(cmd.Context(), "kubernetes config:",
 		slog.F("context", rawConfig.CurrentContext),
