@@ -95,7 +95,7 @@ func (k *KubernetesChecker) Run(ctx context.Context) error {
 
 	for _, res := range k.CheckRBAC(ctx) {
 		if err := k.writer.WriteResult(res); err != nil {
-			return xerrors.Errorf("check SSAR: %w", err)
+			return xerrors.Errorf("check RBAC: %w", err)
 		}
 	}
 	return nil
