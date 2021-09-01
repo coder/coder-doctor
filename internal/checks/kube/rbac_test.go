@@ -156,6 +156,56 @@ func Test_Satisfies(t *testing.T) {
 			Rules:       []rbacv1.PolicyRule{testNoPermRule},
 			Expected:    strptr("not satisfied"),
 		},
+		{
+			Name:        "not allowed: get create apps/deployments",
+			Requirement: NewResourceRequirement("apps", "apps/v1", "deployments"),
+			Verbs:       verbsGetCreate,
+			Rules:       []rbacv1.PolicyRule{testV1WildcardRule},
+			Expected:    strptr("not satisfied"),
+		},
+		{
+			Name:        "allowed: get create apps/deployments",
+			Requirement: NewResourceRequirement("apps", "apps/v1", "deployments"),
+			Verbs:       verbsGetCreate,
+			Rules:       []rbacv1.PolicyRule{testAppsV1WildcardRule},
+			Expected:    nil,
+		},
+		{
+			Name:        "not allowed: delete apps/deployments",
+			Requirement: NewResourceRequirement("apps", "apps/v1", "deployments"),
+			Verbs:       ss("delete"),
+			Rules: []rbacv1.PolicyRule{
+				makeTestPolicyRule(verbsGetCreate, ss("apps"), ss("*"), ss(), ss()),
+			},
+			Expected: strptr("not satisfied"),
+		},
+		{
+			Name:        "allowed: verb wildcard",
+			Requirement: NewResourceRequirement("", "v1", "pods"),
+			Verbs:       verbsGetCreate,
+			Rules: []rbacv1.PolicyRule{
+				makeTestPolicyRule(ss("*"), ss(""), ss("pods"), ss(), ss()),
+			},
+			Expected: nil,
+		},
+		{
+			Name:        "allowed: resource wildcard",
+			Requirement: NewResourceRequirement("", "v1", "pods"),
+			Verbs:       verbsGetCreate,
+			Rules: []rbacv1.PolicyRule{
+				makeTestPolicyRule(verbsGetCreate, ss(""), ss("*"), ss(), ss()),
+			},
+			Expected: nil,
+		},
+		{
+			Name:        "allowed: group wildcard",
+			Requirement: NewResourceRequirement("apps", "apps/v1", "deployments"),
+			Verbs:       verbsGetCreate,
+			Rules: []rbacv1.PolicyRule{
+				makeTestPolicyRule(verbsGetCreate, ss("*"), ss("*"), ss(), ss()),
+			},
+			Expected: nil,
+		},
 		// TODO(cian): add many, many, more.
 	}
 
@@ -174,6 +224,7 @@ func Test_Satisfies(t *testing.T) {
 
 var testNoPermRule = makeTestPolicyRule(ss(), ss(), ss(), ss(), ss())
 var testV1WildcardRule = makeTestPolicyRule(verbsAll, ss(""), ss("*"), ss(), ss())
+var testAppsV1WildcardRule = makeTestPolicyRule(verbsAll, ss("apps"), ss("*"), ss(), ss())
 
 func makeTestPolicyRule(verbs, groups, resources, resourceNames, nonResourceURLs []string) rbacv1.PolicyRule {
 	return rbacv1.PolicyRule{
