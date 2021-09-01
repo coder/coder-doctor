@@ -8,6 +8,8 @@ import (
 
 	"golang.org/x/xerrors"
 
+	"cdr.dev/slog"
+
 	"github.com/Masterminds/semver/v3"
 
 	"github.com/cdr/coder-doctor/internal/api"
@@ -20,41 +22,20 @@ import (
 	"k8s.io/kubectl/pkg/util/slice"
 )
 
+// CheckRBAC checks the cluster for the RBAC permissions required by Coder.
+// It will attempt to first use a SelfSubjectRulesReview to determine the capabilities
+// of the user. If this fails (notably on GKE), fall back to using SelfSubjectAccessRequests
+// which is slower but is more likely to work.
 func (k *KubernetesChecker) CheckRBAC(ctx context.Context) []*api.CheckResult {
-	const checkName = "kubernetes-rbac"
-	authClient := k.client.AuthorizationV1()
-	results := make([]*api.CheckResult, 0)
-
-	for req, reqVerbs := range k.reqs.ResourceRequirements {
-		resName := fmt.Sprintf("%s-%s", checkName, req.Resource)
-		if err := k.checkOneRBAC(ctx, authClient, req, reqVerbs); err != nil {
-			summary := fmt.Sprintf("missing permissions on resource %s: %s", req.Resource, err)
-			results = append(results, api.ErrorResult(resName, summary, err))
-			continue
-		}
-
-		summary := fmt.Sprintf("%s: can %s", req.Resource, strings.Join(reqVerbs, ", "))
-		results = append(results, api.PassResult(resName, summary))
+	if ssrrResults := k.checkRBACDefault(ctx); ssrrResults != nil {
+		return ssrrResults
 	}
 
-	// TODO: delete this when the enterprise-helm role no longer requests resources on things
-	// that don't exist.
-	for req, reqVerbs := range k.reqs.RoleOnlyResourceRequirements {
-		resName := fmt.Sprintf("%s-%s", checkName, req.Resource)
-		if err := k.checkOneRBAC(ctx, authClient, req, reqVerbs); err != nil {
-			summary := fmt.Sprintf("missing permissions on resource %s: %s", req.Resource, err)
-			results = append(results, api.ErrorResult(resName, summary, err))
-			continue
-		}
-
-		summary := fmt.Sprintf("%s: can %s", req.Resource, strings.Join(reqVerbs, ", "))
-		results = append(results, api.PassResult(resName, summary))
-	}
-
-	return results
+	k.log.Warn(ctx, "SelfSubjectRulesReview response incomplete, falling back to SelfSubjectAccessRequests (slow)")
+	return k.checkRBACFallback(ctx)
 }
 
-func (k *KubernetesChecker) CheckRBACSSRR(ctx context.Context) []*api.CheckResult {
+func (k *KubernetesChecker) checkRBACDefault(ctx context.Context) []*api.CheckResult {
 	const checkName = "kubernetes-rbac-ssrr"
 	authClient := k.client.AuthorizationV1()
 	results := make([]*api.CheckResult, 0)
@@ -71,7 +52,7 @@ func (k *KubernetesChecker) CheckRBACSSRR(ctx context.Context) []*api.CheckResul
 	}
 
 	if response.Status.Incomplete {
-		results = append(results, api.WarnResult(checkName, "SelfSubjectRulesReview response incomplete - results may not be correct"))
+		return nil // In this case, we should fall back to using SelfSubjectAccessRequests.
 	}
 
 	// convert the list of rules from the server to PolicyRules and dedupe/compact
@@ -82,6 +63,9 @@ func (k *KubernetesChecker) CheckRBACSSRR(ctx context.Context) []*api.CheckResul
 
 	compactRules, _ := rbacutil.CompactRules(breakdownRules) //nolint:errcheck - err is always nil
 	sort.Stable(rbacutil.SortableRuleSlice(compactRules))
+	for _, r := range compactRules {
+		k.log.Debug(ctx, "Got SSRR PolicyRule", slog.F("rule", r))
+	}
 
 	// TODO: optimise this
 	for req, reqVerbs := range k.reqs.ResourceRequirements {
@@ -90,7 +74,7 @@ func (k *KubernetesChecker) CheckRBACSSRR(ctx context.Context) []*api.CheckResul
 			results = append(results, api.ErrorResult(checkName, summary, err))
 			continue
 		}
-		summary := fmt.Sprintf("%s: can %s", req.Resource, strings.Join(reqVerbs, ", "))
+		summary := fmt.Sprintf("%s/%s: can %s", req.Group, req.Resource, strings.Join(reqVerbs, ", "))
 		results = append(results, api.PassResult(checkName, summary))
 	}
 
@@ -148,7 +132,43 @@ func apiResourceMatch(want string, have []string) bool {
 	return false
 }
 
-func (k *KubernetesChecker) checkOneRBAC(ctx context.Context, authClient authorizationclientv1.AuthorizationV1Interface, req *ResourceRequirement, reqVerbs ResourceVerbs) error {
+// checkRBACFallback uses a SelfSubjectAccessRequest to check the cluster for the required
+// accesses. This requires a number of checks and is relatively slow.
+func (k *KubernetesChecker) checkRBACFallback(ctx context.Context) []*api.CheckResult {
+	const checkName = "kubernetes-rbac"
+	authClient := k.client.AuthorizationV1()
+	results := make([]*api.CheckResult, 0)
+
+	for req, reqVerbs := range k.reqs.ResourceRequirements {
+		resName := fmt.Sprintf("%s-%s", checkName, req.Resource)
+		if err := k.checkOneRBACSSAR(ctx, authClient, req, reqVerbs); err != nil {
+			summary := fmt.Sprintf("missing permissions on resource %s: %s", req.Resource, err)
+			results = append(results, api.ErrorResult(resName, summary, err))
+			continue
+		}
+
+		summary := fmt.Sprintf("%s: can %s", req.Resource, strings.Join(reqVerbs, ", "))
+		results = append(results, api.PassResult(resName, summary))
+	}
+
+	// TODO: delete this when the enterprise-helm role no longer requests resources on things
+	// that don't exist.
+	for req, reqVerbs := range k.reqs.RoleOnlyResourceRequirements {
+		resName := fmt.Sprintf("%s-%s", checkName, req.Resource)
+		if err := k.checkOneRBACSSAR(ctx, authClient, req, reqVerbs); err != nil {
+			summary := fmt.Sprintf("missing permissions on resource %s: %s", req.Resource, err)
+			results = append(results, api.ErrorResult(resName, summary, err))
+			continue
+		}
+
+		summary := fmt.Sprintf("%s: can %s", req.Resource, strings.Join(reqVerbs, ", "))
+		results = append(results, api.PassResult(resName, summary))
+	}
+
+	return results
+}
+
+func (k *KubernetesChecker) checkOneRBACSSAR(ctx context.Context, authClient authorizationclientv1.AuthorizationV1Interface, req *ResourceRequirement, reqVerbs ResourceVerbs) error {
 	have := make([]string, 0, len(reqVerbs))
 	for _, verb := range reqVerbs {
 		sar := &authorizationv1.SelfSubjectAccessReview{

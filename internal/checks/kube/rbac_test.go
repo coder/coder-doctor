@@ -15,7 +15,7 @@ import (
 	"github.com/cdr/coder-doctor/internal/api"
 )
 
-func Test_CheckRBAC(t *testing.T) {
+func Test_CheckRBACFallback(t *testing.T) {
 	t.Parallel()
 
 	tests := []struct {
@@ -59,13 +59,13 @@ func Test_CheckRBAC(t *testing.T) {
 			assert.Success(t, "failed to create client", err)
 
 			checker := NewKubernetesChecker(client)
-			results := checker.CheckRBAC(context.Background())
+			results := checker.checkRBACFallback(context.Background())
 			test.F(t, results)
 		})
 	}
 }
 
-func Test_CheckRBAC_ClientError(t *testing.T) {
+func Test_CheckRBACFallback_ClientError(t *testing.T) {
 	t.Parallel()
 
 	server := newTestHTTPServer(t, http.StatusInternalServerError, nil)
@@ -74,7 +74,7 @@ func Test_CheckRBAC_ClientError(t *testing.T) {
 	assert.Success(t, "failed to create client", err)
 
 	checker := NewKubernetesChecker(client)
-	results := checker.CheckRBAC(context.Background())
+	results := checker.checkRBACFallback(context.Background())
 	for _, result := range results {
 		assert.ErrorContains(t, result.Name+" should show correct error", result.Details["error"].(error), "failed to create SelfSubjectAccessReview request")
 		assert.True(t, result.Name+" should fail", result.State == api.StateFailed)
@@ -93,7 +93,7 @@ var selfSubjectAccessReviewDenied authorizationv1.SelfSubjectAccessReview = auth
 	},
 }
 
-func Test_CheckRBACSSRR(t *testing.T) {
+func Test_CheckRBACDefault(t *testing.T) {
 	t.Parallel()
 
 	tests := []struct {
@@ -126,7 +126,7 @@ func Test_CheckRBACSSRR(t *testing.T) {
 			assert.Success(t, "failed to create client", err)
 
 			checker := NewKubernetesChecker(client)
-			results := checker.CheckRBACSSRR(context.Background())
+			results := checker.checkRBACDefault(context.Background())
 			test.F(t, results)
 		})
 	}
