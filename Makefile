@@ -27,3 +27,11 @@ lint/shellcheck: $(shell scripts/depfind/sh.sh)
 
 lint: lint/go lint/shellcheck
 .PHONY: lint
+
+test: test/go
+.PHONY: test
+
+test/go:
+	@echo "--- go test"
+	go test -parallel=$(shell nproc) ./...
+.PHONY: test/go
