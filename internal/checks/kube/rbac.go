@@ -70,11 +70,30 @@ func (k *KubernetesChecker) checkRBACDefault(ctx context.Context) []*api.CheckRe
 	// TODO: optimise this
 	for req, reqVerbs := range k.reqs.ResourceRequirements {
 		if err := satisfies(req, reqVerbs, compactRules); err != nil {
-			summary := fmt.Sprintf("missing permissions on resource %s: %s", req.Resource, err)
+			summary := fmt.Sprintf("resource %s: %s", req.Resource, err)
 			results = append(results, api.ErrorResult(checkName, summary, err))
 			continue
 		}
-		summary := fmt.Sprintf("%s/%s: can %s", req.Group, req.Resource, strings.Join(reqVerbs, ", "))
+		resourceName := req.Resource
+		if req.Group != "" {
+			resourceName = req.Group + "/" + req.Resource
+		}
+		summary := fmt.Sprintf("resource %s: can %s", resourceName, strings.Join(reqVerbs, ", "))
+		results = append(results, api.PassResult(checkName, summary))
+	}
+
+	// TODO: remove this when the helm chart is fixed
+	for req, reqVerbs := range k.reqs.RoleOnlyResourceRequirements {
+		if err := satisfies(req, reqVerbs, compactRules); err != nil {
+			summary := fmt.Sprintf("resource %s: %s", req.Resource, err)
+			results = append(results, api.ErrorResult(checkName, summary, err))
+			continue
+		}
+		resourceName := req.Resource
+		if req.Group != "" {
+			resourceName = req.Group + "/" + req.Resource
+		}
+		summary := fmt.Sprintf("resource %s: can %s", resourceName, strings.Join(reqVerbs, ", "))
 		results = append(results, api.PassResult(checkName, summary))
 	}
 
