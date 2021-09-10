@@ -48,3 +48,5 @@ jobs:
 
       - name: Tests
         run: ./scripts/test_go.sh
+        env:
+          COVERALLS_TOKEN: ${{ github.token }}
