@@ -3,6 +3,7 @@
 # Run unit and integration tests for Go code
 
 set -euo pipefail
+CI=${CI:-""}
 PROJECT_ROOT="$(git rev-parse --show-toplevel)"
 cd "$PROJECT_ROOT"
 source "./scripts/lib.sh"
@@ -49,11 +50,14 @@ run_trace false gotestsum tool slowest \
   --jsonfile="$TESTREPORT_JSON" \
   --threshold="$threshold"
 
-# From time to time, Coveralls seems to have an issue on their end, so
-# make a best-effort attempt to upload coverage but ignore failures
-set +e
-echo "--- Uploading test coverage report to Coveralls..."
-run_trace false goveralls -service=github -coverprofile="$COVERAGE"
-set -e
+# Skip coveralls if not running in CI
+if [[ -n "${CI}" ]]; then
+  # From time to time, Coveralls seems to have an issue on their end, so
+  # make a best-effort attempt to upload coverage but ignore failures
+  set +e
+  echo "--- Uploading test coverage report to Coveralls..."
+  run_trace false goveralls -service=github -coverprofile="$COVERAGE"
+  set -e
+fi
 
 exit $test_status
