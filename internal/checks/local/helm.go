@@ -32,7 +32,7 @@ var versionRequirements = []VersionRequirement{
 
 func (l *Checker) CheckLocalHelmVersion(ctx context.Context) *api.CheckResult {
 	if l.target != api.CheckTargetKubernetes {
-		return api.SkippedResult(LocalHelmVersionCheck, "not applicable for target "+string(l.target))
+		return api.SkippedResult(LocalHelmVersionCheck, "not applicable for target "+string(l.target), nil)
 	}
 
 	helmBin, err := l.lookPathF("helm")

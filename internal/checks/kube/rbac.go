@@ -48,7 +48,7 @@ func (k *KubernetesChecker) checkRBACDefault(ctx context.Context) []*api.CheckRe
 
 	response, err := authClient.SelfSubjectRulesReviews().Create(ctx, sar, metav1.CreateOptions{})
 	if err != nil {
-		return []*api.CheckResult{api.SkippedResult(checkName, "unable to create SelfSubjectRulesReview request: "+err.Error())}
+		return []*api.CheckResult{api.SkippedResult(checkName, "unable to create SelfSubjectRulesReview request: "+err.Error(), err)}
 	}
 
 	if response.Status.Incomplete {

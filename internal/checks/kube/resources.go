@@ -16,7 +16,7 @@ func (k *KubernetesChecker) CheckResources(_ context.Context) []*api.CheckResult
 	dc := k.client.Discovery()
 	lists, err := dc.ServerPreferredResources()
 	if err != nil {
-		results = append(results, api.SkippedResult(checkName, "unable to fetch api resources from server: "+err.Error()))
+		results = append(results, api.SkippedResult(checkName, "unable to fetch api resources from server: "+err.Error(), err))
 		return results
 	}
 
