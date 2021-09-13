@@ -15,6 +15,19 @@ import (
 	"github.com/cdr/coder-doctor/internal/api"
 )
 
+func Test_CheckRBAC_Error(t *testing.T) {
+	t.Parallel()
+
+	srv := newTestHTTPServer(t, 500, nil)
+	defer srv.Close()
+	client, err := kubernetes.NewForConfig(&rest.Config{Host: srv.URL})
+	assert.Success(t, "failed to create client", err)
+
+	checker := NewKubernetesChecker(client)
+	results := checker.CheckRBAC(context.Background())
+	assert.True(t, "should contain one result", len(results) == 1)
+	assert.True(t, "result should be failed", results[0].State == api.StateFailed)
+}
 func Test_CheckRBACFallback(t *testing.T) {
 	t.Parallel()
 
@@ -99,15 +112,16 @@ func Test_CheckRBACDefault(t *testing.T) {
 	tests := []struct {
 		Name     string
 		Response *authorizationv1.SelfSubjectRulesReview
-		F        func(*testing.T, []*api.CheckResult)
+		TestFunc func(*testing.T, []*api.CheckResult, error)
 	}{
 		{
 			Name:     "nothing allowed",
 			Response: &selfSubjectRulesReviewEmpty,
-			F: func(t *testing.T, results []*api.CheckResult) {
+			TestFunc: func(t *testing.T, results []*api.CheckResult, err error) {
 				assert.False(t, "results should not be empty", len(results) == 0)
 				for _, result := range results {
-					assert.True(t, result.Name+" should have an error", result.Details["error"] != nil)
+					assert.True(t, result.Name+" should not return an error", err == nil)
+					assert.True(t, result.Name+" should contain an error in details", result.Details["error"] != nil)
 					assert.True(t, result.Name+" should fail", result.State == api.StateFailed)
 				}
 			},
@@ -126,8 +140,8 @@ func Test_CheckRBACDefault(t *testing.T) {
 			assert.Success(t, "failed to create client", err)
 
 			checker := NewKubernetesChecker(client)
-			results := checker.checkRBACDefault(context.Background())
-			test.F(t, results)
+			results, err := checker.checkRBACDefault(context.Background())
+			test.TestFunc(t, results, err)
 		})
 	}
 }
@@ -135,7 +149,7 @@ func Test_CheckRBACDefault(t *testing.T) {
 func Test_Satisfies(t *testing.T) {
 	t.Parallel()
 
-	testCases := []struct {
+	tests := []struct {
 		Name        string
 		Requirement *ResourceRequirement
 		Verbs       ResourceVerbs
@@ -209,14 +223,14 @@ func Test_Satisfies(t *testing.T) {
 		// TODO(cian): add many, many, more.
 	}
 
-	for _, testCase := range testCases {
-		testCase := testCase
-		t.Run(testCase.Name, func(t *testing.T) {
-			actual := satisfies(testCase.Requirement, testCase.Verbs, testCase.Rules)
-			if testCase.Expected == nil {
-				assert.Success(t, testCase.Name+"- should not error", actual)
+	for _, test := range tests {
+		test := test
+		t.Run(test.Name, func(t *testing.T) {
+			actual := satisfies(test.Requirement, test.Verbs, test.Rules)
+			if test.Expected == nil {
+				assert.Success(t, test.Name+"- should not error", actual)
 			} else {
-				assert.ErrorContains(t, testCase.Name+" - expected error contains", actual, *testCase.Expected)
+				assert.ErrorContains(t, test.Name+" - expected error contains", actual, *test.Expected)
 			}
 		})
 	}
