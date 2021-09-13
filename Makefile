@@ -33,5 +33,5 @@ test: test/go
 
 test/go:
 	@echo "--- go test"
-	$(shell scripts/test_go.sh)
+	scripts/test_go.sh
 .PHONY: test/go
