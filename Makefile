@@ -33,5 +33,5 @@ test: test/go
 
 test/go:
 	@echo "--- go test"
-	go test -parallel=$(shell nproc) ./...
+	scripts/test_go.sh
 .PHONY: test/go

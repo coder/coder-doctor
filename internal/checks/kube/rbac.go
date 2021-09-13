@@ -22,20 +22,29 @@ import (
 	"k8s.io/kubectl/pkg/util/slice"
 )
 
+var errSelfSubjectRulesReviewNotSupported = xerrors.New("cluster does not support SelfSubjectRulesReview")
+
 // CheckRBAC checks the cluster for the RBAC permissions required by Coder.
 // It will attempt to first use a SelfSubjectRulesReview to determine the capabilities
 // of the user. If this fails (notably on GKE), fall back to using SelfSubjectAccessRequests
 // which is slower but is more likely to work.
 func (k *KubernetesChecker) CheckRBAC(ctx context.Context) []*api.CheckResult {
-	if ssrrResults := k.checkRBACDefault(ctx); ssrrResults != nil {
+	ssrrResults, err := k.checkRBACDefault(ctx)
+	if err == nil {
 		return ssrrResults
 	}
 
-	k.log.Warn(ctx, "SelfSubjectRulesReview response incomplete, falling back to SelfSubjectAccessRequests (slow)")
-	return k.checkRBACFallback(ctx)
+	if xerrors.Is(err, errSelfSubjectRulesReviewNotSupported) {
+		// In this case, we should fall back to using SelfSubjectAccessRequests.
+		k.log.Warn(ctx, "unable to check via SelfSubjectRulesReview, falling back to SelfSubjectAccessRequests (slow)")
+		return k.checkRBACFallback(ctx)
+	}
+
+	// something else went wrong
+	return []*api.CheckResult{api.ErrorResult("kubernetes-rbac", "unable to check rbac", err)}
 }
 
-func (k *KubernetesChecker) checkRBACDefault(ctx context.Context) []*api.CheckResult {
+func (k *KubernetesChecker) checkRBACDefault(ctx context.Context) ([]*api.CheckResult, error) {
 	const checkName = "kubernetes-rbac-ssrr"
 	authClient := k.client.AuthorizationV1()
 	results := make([]*api.CheckResult, 0)
@@ -48,11 +57,11 @@ func (k *KubernetesChecker) checkRBACDefault(ctx context.Context) []*api.CheckRe
 
 	response, err := authClient.SelfSubjectRulesReviews().Create(ctx, sar, metav1.CreateOptions{})
 	if err != nil {
-		return []*api.CheckResult{api.SkippedResult(checkName, "unable to create SelfSubjectRulesReview request: "+err.Error())}
+		return nil, xerrors.Errorf("create SelfSubjectRulesReview: %w", err)
 	}
 
 	if response.Status.Incomplete {
-		return nil // In this case, we should fall back to using SelfSubjectAccessRequests.
+		return nil, errSelfSubjectRulesReviewNotSupported
 	}
 
 	// convert the list of rules from the server to PolicyRules and dedupe/compact
@@ -97,7 +106,7 @@ func (k *KubernetesChecker) checkRBACDefault(ctx context.Context) []*api.CheckRe
 		results = append(results, api.PassResult(checkName, summary))
 	}
 
-	return results
+	return results, nil
 }
 
 func satisfies(req *ResourceRequirement, verbs ResourceVerbs, rules []rbacv1.PolicyRule) error {
