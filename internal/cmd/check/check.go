@@ -15,6 +15,7 @@ func NewCommand() *cobra.Command {
 
 	checkCmd.PersistentFlags().Int("verbosity", 0, "log level verbosity")
 	checkCmd.PersistentFlags().String("coder-version", "1.21", "version of Coder")
+	checkCmd.PersistentFlags().Bool("no-color", false, "disable colorful output")
 
 	checkCmd.AddCommand(
 		kubernetes.NewCommand(),

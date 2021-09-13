@@ -120,14 +120,19 @@ func run(cmd *cobra.Command, _ []string) error {
 		currentContext.Namespace = "default"
 	}
 
-	log.Info(cmd.Context(), "kubernetes config:",
-		slog.F("context", rawConfig.CurrentContext),
-		slog.F("cluster", currentContext.Cluster),
-		slog.F("namespace", currentContext.Namespace),
-		slog.F("authinfo", currentContext.AuthInfo),
+	noColorFlag, err := cmd.Flags().GetBool("no-color")
+	if err != nil {
+		return xerrors.Errorf("parse no-color: %w", err)
+	}
+	outputMode := humanwriter.OutputModeEmoji
+	if noColorFlag {
+		outputMode = humanwriter.OutputModeText
+	}
+	hw := humanwriter.New(
+		os.Stdout,
+		humanwriter.WithColors(!noColorFlag),
+		humanwriter.WithMode(outputMode),
 	)
-
-	hw := humanwriter.New(os.Stdout)
 
 	localChecker := local.NewChecker(
 		local.WithLogger(log),
@@ -143,6 +148,18 @@ func run(cmd *cobra.Command, _ []string) error {
 		kube.WithWriter(hw),
 		kube.WithNamespace(currentContext.Namespace),
 	)
+
+	_ = hw.WriteResult(&api.CheckResult{
+		Name:    "kubernetes config",
+		State:   api.StateInfo,
+		Summary: "using the following context to talk to kubernetes",
+		Details: map[string]interface{}{
+			"context":   rawConfig.CurrentContext,
+			"cluster":   currentContext.Cluster,
+			"namespace": currentContext.Namespace,
+			"authinfo":  currentContext.AuthInfo,
+		},
+	})
 
 	if err := localChecker.Validate(); err != nil {
 		return xerrors.Errorf("failed to validate local checks: %w", err)
