@@ -150,15 +150,27 @@ func run(cmd *cobra.Command, _ []string) error {
 	)
 
 	_ = hw.WriteResult(&api.CheckResult{
-		Name:    "kubernetes config",
+		Name:    "kubernetes current-context",
 		State:   api.StateInfo,
-		Summary: "using the following context to talk to kubernetes",
-		Details: map[string]interface{}{
-			"context":   rawConfig.CurrentContext,
-			"cluster":   currentContext.Cluster,
-			"namespace": currentContext.Namespace,
-			"authinfo":  currentContext.AuthInfo,
-		},
+		Summary: rawConfig.CurrentContext,
+	})
+
+	_ = hw.WriteResult(&api.CheckResult{
+		Name:    "kubernetes cluster",
+		State:   api.StateInfo,
+		Summary: currentContext.Cluster,
+	})
+
+	_ = hw.WriteResult(&api.CheckResult{
+		Name:    "kubernetes namespace",
+		State:   api.StateInfo,
+		Summary: currentContext.Namespace,
+	})
+
+	_ = hw.WriteResult(&api.CheckResult{
+		Name:    "kubernetes authinfo",
+		State:   api.StateInfo,
+		Summary: currentContext.AuthInfo,
 	})
 
 	if err := localChecker.Validate(); err != nil {
