@@ -120,24 +120,31 @@ func run(cmd *cobra.Command, _ []string) error {
 		currentContext.Namespace = "default"
 	}
 
-	noColorFlag, err := cmd.Flags().GetBool("no-color")
+	colorFlag, err := cmd.Flags().GetBool("color")
 	if err != nil {
-		return xerrors.Errorf("parse no-color: %w", err)
+		return xerrors.Errorf("parse color: %w", err)
 	}
+
+	asciiFlag, err := cmd.Flags().GetBool("ascii")
+	if err != nil {
+		return xerrors.Errorf("parse ascii: %w", err)
+	}
+
 	outputMode := humanwriter.OutputModeEmoji
-	if noColorFlag {
+	if asciiFlag {
 		outputMode = humanwriter.OutputModeText
 	}
-	hw := humanwriter.New(
+
+	var writer api.ResultWriter = humanwriter.New(
 		os.Stdout,
-		humanwriter.WithColors(!noColorFlag),
+		humanwriter.WithColors(colorFlag),
 		humanwriter.WithMode(outputMode),
 	)
 
 	localChecker := local.NewChecker(
 		local.WithLogger(log),
 		local.WithCoderVersion(cv),
-		local.WithWriter(hw),
+		local.WithWriter(writer),
 		local.WithTarget(api.CheckTargetKubernetes),
 	)
 
@@ -145,29 +152,29 @@ func run(cmd *cobra.Command, _ []string) error {
 		clientset,
 		kube.WithLogger(log),
 		kube.WithCoderVersion(cv),
-		kube.WithWriter(hw),
+		kube.WithWriter(writer),
 		kube.WithNamespace(currentContext.Namespace),
 	)
 
-	_ = hw.WriteResult(&api.CheckResult{
+	_ = writer.WriteResult(&api.CheckResult{
 		Name:    "kubernetes current-context",
 		State:   api.StateInfo,
 		Summary: rawConfig.CurrentContext,
 	})
 
-	_ = hw.WriteResult(&api.CheckResult{
+	_ = writer.WriteResult(&api.CheckResult{
 		Name:    "kubernetes cluster",
 		State:   api.StateInfo,
 		Summary: currentContext.Cluster,
 	})
 
-	_ = hw.WriteResult(&api.CheckResult{
+	_ = writer.WriteResult(&api.CheckResult{
 		Name:    "kubernetes namespace",
 		State:   api.StateInfo,
 		Summary: currentContext.Namespace,
 	})
 
-	_ = hw.WriteResult(&api.CheckResult{
+	_ = writer.WriteResult(&api.CheckResult{
 		Name:    "kubernetes authinfo",
 		State:   api.StateInfo,
 		Summary: currentContext.AuthInfo,
