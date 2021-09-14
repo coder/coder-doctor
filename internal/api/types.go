@@ -126,9 +126,7 @@ func (s CheckState) Color() (PrintFunc, error) {
 		return color.RedString, nil
 	case StateWarning:
 		return color.YellowString, nil
-	case StateInfo:
-		return color.CyanString, nil
-	case StateSkipped:
+	case StateInfo, StateSkipped:
 		return fmt.Sprintf, nil
 	default:
 		return nil, xerrors.Errorf("unknown state: %d", s)
