@@ -1,6 +1,7 @@
 package kubernetes
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/Masterminds/semver/v3"
@@ -159,25 +160,13 @@ func run(cmd *cobra.Command, _ []string) error {
 	_ = writer.WriteResult(&api.CheckResult{
 		Name:    "kubernetes current-context",
 		State:   api.StateInfo,
-		Summary: rawConfig.CurrentContext,
-	})
-
-	_ = writer.WriteResult(&api.CheckResult{
-		Name:    "kubernetes cluster",
-		State:   api.StateInfo,
-		Summary: currentContext.Cluster,
-	})
-
-	_ = writer.WriteResult(&api.CheckResult{
-		Name:    "kubernetes namespace",
-		State:   api.StateInfo,
-		Summary: currentContext.Namespace,
-	})
-
-	_ = writer.WriteResult(&api.CheckResult{
-		Name:    "kubernetes authinfo",
-		State:   api.StateInfo,
-		Summary: currentContext.AuthInfo,
+		Summary: fmt.Sprintf("kube context: %q", rawConfig.CurrentContext),
+		Details: map[string]interface{}{
+			"current-context": rawConfig.CurrentContext,
+			"cluster":         currentContext.Cluster,
+			"namespace":       currentContext.Namespace,
+			"user":            currentContext.AuthInfo,
+		},
 	})
 
 	if err := localChecker.Validate(); err != nil {
