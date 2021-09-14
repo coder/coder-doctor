@@ -82,6 +82,11 @@ func (w *HumanResultWriter) WriteResult(result *api.CheckResult) error {
 		return err
 	}
 
-	_, err = fmt.Fprintf(w.out, "%s %s\n", prefix, result.Summary)
+	var printFunc api.PrintFunc = fmt.Sprintf
+	if w.colors {
+		printFunc = result.State.MustColor()
+	}
+
+	_, err = fmt.Fprint(w.out, printFunc("%s %s\n", prefix, result.Summary))
 	return err
 }
