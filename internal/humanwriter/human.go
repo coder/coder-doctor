@@ -82,11 +82,6 @@ func (w *HumanResultWriter) WriteResult(result *api.CheckResult) error {
 		return err
 	}
 
-	namePrefix := ""
-	if result.Name != "" {
-		namePrefix = fmt.Sprintf(" [%s]", result.Name)
-	}
-
-	_, err = fmt.Fprintf(w.out, "%s%s %s\n", prefix, namePrefix, result.Summary)
+	_, err = fmt.Fprintf(w.out, "%s %s\n", prefix, result.Summary)
 	return err
 }
