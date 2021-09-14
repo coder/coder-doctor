@@ -121,14 +121,14 @@ func run(cmd *cobra.Command, _ []string) error {
 		currentContext.Namespace = "default"
 	}
 
-	colorFlag, err := cmd.Flags().GetBool("color")
+	colorFlag, err := cmd.Flags().GetBool("output-colors")
 	if err != nil {
-		return xerrors.Errorf("parse color: %w", err)
+		return xerrors.Errorf("parse output-color: %w", err)
 	}
 
-	asciiFlag, err := cmd.Flags().GetBool("ascii")
+	asciiFlag, err := cmd.Flags().GetBool("output-ascii")
 	if err != nil {
-		return xerrors.Errorf("parse ascii: %w", err)
+		return xerrors.Errorf("parse output-ascii: %w", err)
 	}
 
 	outputMode := humanwriter.OutputModeEmoji
