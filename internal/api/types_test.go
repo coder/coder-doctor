@@ -35,7 +35,7 @@ func TestKnownStates(t *testing.T) {
 			_ = state.MustText()
 
 			colorFunc, err := state.Color()
-			assert.Success(t, "state.Color() error non-nil", err)
+			assert.Success(t, "state.Color() error nil", err)
 			assert.True(t, "state.Color() is non-nil", colorFunc != nil)
 			_ = state.MustColor()
 
