@@ -58,11 +58,11 @@ func (s CheckState) MustEmoji() string {
 func (s CheckState) Emoji() (string, error) {
 	switch s {
 	case StatePassed:
-		return "👍", nil
+		return "✓", nil
 	case StateWarning:
 		return "⚠️", nil
 	case StateFailed:
-		return "👎", nil
+		return "✗", nil
 	case StateInfo:
 		return "🔔", nil
 	case StateSkipped:
