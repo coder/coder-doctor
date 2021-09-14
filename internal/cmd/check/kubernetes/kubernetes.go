@@ -1,6 +1,7 @@
 package kubernetes
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/Masterminds/semver/v3"
@@ -120,19 +121,31 @@ func run(cmd *cobra.Command, _ []string) error {
 		currentContext.Namespace = "default"
 	}
 
-	log.Info(cmd.Context(), "kubernetes config:",
-		slog.F("context", rawConfig.CurrentContext),
-		slog.F("cluster", currentContext.Cluster),
-		slog.F("namespace", currentContext.Namespace),
-		slog.F("authinfo", currentContext.AuthInfo),
-	)
+	colorFlag, err := cmd.Flags().GetBool("output-colors")
+	if err != nil {
+		return xerrors.Errorf("parse output-color: %w", err)
+	}
 
-	hw := humanwriter.New(os.Stdout)
+	asciiFlag, err := cmd.Flags().GetBool("output-ascii")
+	if err != nil {
+		return xerrors.Errorf("parse output-ascii: %w", err)
+	}
+
+	outputMode := humanwriter.OutputModeEmoji
+	if asciiFlag {
+		outputMode = humanwriter.OutputModeText
+	}
+
+	var writer api.ResultWriter = humanwriter.New(
+		os.Stdout,
+		humanwriter.WithColors(colorFlag),
+		humanwriter.WithMode(outputMode),
+	)
 
 	localChecker := local.NewChecker(
 		local.WithLogger(log),
 		local.WithCoderVersion(cv),
-		local.WithWriter(hw),
+		local.WithWriter(writer),
 		local.WithTarget(api.CheckTargetKubernetes),
 	)
 
@@ -140,9 +153,21 @@ func run(cmd *cobra.Command, _ []string) error {
 		clientset,
 		kube.WithLogger(log),
 		kube.WithCoderVersion(cv),
-		kube.WithWriter(hw),
+		kube.WithWriter(writer),
 		kube.WithNamespace(currentContext.Namespace),
 	)
+
+	_ = writer.WriteResult(&api.CheckResult{
+		Name:    "kubernetes current-context",
+		State:   api.StateInfo,
+		Summary: fmt.Sprintf("kube context: %q", rawConfig.CurrentContext),
+		Details: map[string]interface{}{
+			"current-context": rawConfig.CurrentContext,
+			"cluster":         currentContext.Cluster,
+			"namespace":       currentContext.Namespace,
+			"user":            currentContext.AuthInfo,
+		},
+	})
 
 	if err := localChecker.Validate(); err != nil {
 		return xerrors.Errorf("failed to validate local checks: %w", err)

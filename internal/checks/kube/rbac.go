@@ -168,29 +168,27 @@ func (k *KubernetesChecker) checkRBACFallback(ctx context.Context) []*api.CheckR
 	results := make([]*api.CheckResult, 0)
 
 	for req, reqVerbs := range k.reqs.ResourceRequirements {
-		resName := fmt.Sprintf("%s-%s", checkName, req.Resource)
 		if err := k.checkOneRBACSSAR(ctx, authClient, req, reqVerbs); err != nil {
 			summary := fmt.Sprintf("missing permissions on resource %s: %s", req.Resource, err)
-			results = append(results, api.ErrorResult(resName, summary, err))
+			results = append(results, api.ErrorResult(checkName, summary, err))
 			continue
 		}
 
 		summary := fmt.Sprintf("%s: can %s", req.Resource, strings.Join(reqVerbs, ", "))
-		results = append(results, api.PassResult(resName, summary))
+		results = append(results, api.PassResult(checkName, summary))
 	}
 
 	// TODO: delete this when the enterprise-helm role no longer requests resources on things
 	// that don't exist.
 	for req, reqVerbs := range k.reqs.RoleOnlyResourceRequirements {
-		resName := fmt.Sprintf("%s-%s", checkName, req.Resource)
 		if err := k.checkOneRBACSSAR(ctx, authClient, req, reqVerbs); err != nil {
 			summary := fmt.Sprintf("missing permissions on resource %s: %s", req.Resource, err)
-			results = append(results, api.ErrorResult(resName, summary, err))
+			results = append(results, api.ErrorResult(checkName, summary, err))
 			continue
 		}
 
 		summary := fmt.Sprintf("%s: can %s", req.Resource, strings.Join(reqVerbs, ", "))
-		results = append(results, api.PassResult(resName, summary))
+		results = append(results, api.PassResult(checkName, summary))
 	}
 
 	return results

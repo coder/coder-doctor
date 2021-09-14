@@ -19,5 +19,8 @@ func NewDefaultDoctorCommand() *cobra.Command {
 		check.NewCommand(),
 	)
 
+	rootCmd.PersistentFlags().Bool("output-colors", true, "enable colorful output")
+	rootCmd.PersistentFlags().Bool("output-ascii", false, "output ascii only")
+
 	return rootCmd
 }

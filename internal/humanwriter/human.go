@@ -82,6 +82,6 @@ func (w *HumanResultWriter) WriteResult(result *api.CheckResult) error {
 		return err
 	}
 
-	_, err = fmt.Fprintln(w.out, prefix, result.Summary)
+	_, err = fmt.Fprintf(w.out, "%s %s\n", prefix, result.Summary)
 	return err
 }
