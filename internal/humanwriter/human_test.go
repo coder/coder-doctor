@@ -52,9 +52,9 @@ func TestHumanWriter(t *testing.T) {
 			var expected string
 			switch mode {
 			case humanwriter.OutputModeEmoji:
-				expected = "👍 human writer check test\n" +
+				expected = "✓ human writer check test\n" +
 					"🔔 summary\n" +
-					"👎 failed message\n" +
+					"✗ failed message\n" +
 					"⚠️ \n" +
 					"⏩ skipped check\n"
 			case humanwriter.OutputModeText:

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/fatih/color"
 	"golang.org/x/xerrors"
 )
 
@@ -57,11 +58,11 @@ func (s CheckState) MustEmoji() string {
 func (s CheckState) Emoji() (string, error) {
 	switch s {
 	case StatePassed:
-		return "👍", nil
+		return "✓", nil
 	case StateWarning:
 		return "⚠️", nil
 	case StateFailed:
-		return "👎", nil
+		return "✗", nil
 	case StateInfo:
 		return "🔔", nil
 	case StateSkipped:
@@ -111,6 +112,33 @@ func (s CheckState) String() string {
 	}
 
 	panic(fmt.Sprintf("unknown state: %d", s))
+}
+
+type PrintFunc func(format string, args ...interface{}) string
+
+var _ PrintFunc = fmt.Sprintf
+
+func (s CheckState) Color() (PrintFunc, error) {
+	switch s {
+	case StatePassed:
+		return color.GreenString, nil
+	case StateFailed:
+		return color.RedString, nil
+	case StateWarning:
+		return color.YellowString, nil
+	case StateInfo, StateSkipped:
+		return fmt.Sprintf, nil
+	default:
+		return nil, xerrors.Errorf("unknown state: %d", s)
+	}
+}
+
+func (s CheckState) MustColor() PrintFunc {
+	printFunc, err := s.Color()
+	if err != nil {
+		panic(err.Error())
+	}
+	return printFunc
 }
 
 type CheckResult struct {

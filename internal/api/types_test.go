@@ -34,6 +34,11 @@ func TestKnownStates(t *testing.T) {
 			assert.True(t, "state.Text() is non-empty", len(text) > 0)
 			_ = state.MustText()
 
+			colorFunc, err := state.Color()
+			assert.Success(t, "state.Color() error nil", err)
+			assert.True(t, "state.Color() is non-nil", colorFunc != nil)
+			_ = state.MustColor()
+
 			str := state.String()
 			assert.True(t, "state.String() is non-empty", len(str) > 0)
 		})
