@@ -1,20 +1,45 @@
-# Coder doctor
+# Coder Doctor 🧑‍⚕️
 
-This repository contains an initial implementation of a command-line
-diagnostic tool and library for checking that a given system can run
-the Coder control plane and workspaces.
+Coder Doctor is a command-line diagnostic tool for checking that a
+given platform can run the Coder control plane and workspaces.
 
-The initial implementation performs a series of preflight checks, as
-described in [Preflight cluster health check tool] RFC.
+## Supported Platforms
 
-[Preflight cluster health check tool]: https://www.notion.so/coderhq/Preflight-cluster-health-check-tool-07024636e1c741e2a30e482bb796ea0a
+Currently, the following platforms are supported, with the following
+preflight checks:
 
-This may (or may not) be the final home of this project. Please
-provide feedback regarding the plan on the RFC, or comments on the
-implementation as comments in the relevant pull requests.
+### Kubernetes
 
-This project is in `alpha` state and Coder offers no compatibility
-guarantees, either for the tool itself or any public Go APIs. Most
-code is kept in the `internal` package to make this clear, and will
-be promoted to an externally-importable package once we enter `beta`
-state.
+- Kubernetes Version: checks the cluster version for compatibility
+with the requested version of Coder.
+- Helm Version: checks the locally-installed Helm version for
+compatibility with the requested version of Coder.
+- Kubernetes RBAC: checks that the service account has the required
+permissions to run Coder.
+- Kubernetes Resosurces: checks that the cluster has the required
+resource types available to run Coder.
+
+## Usage
+
+To check if your Kubernetes cluster is ready to install Coder, run:
+
+```console
+coder-doctor check kubernetes
+```
+
+For more information, you can run:
+
+```console
+coder-doctor -h
+```
+
+## Feedback
+
+We love feedback! If you have any issues or suggestions, please feel
+free to submit an [issue](https://github.com/cdr/coder-doctor/issues) or [pull request](https://github.com/cdr/coder-doctor/pulls).
+
+**Note:** This project is in `alpha` state and Coder offers no
+compatibility guarantees, either for the tool itself or any public Go
+APIs. Most code is kept in the `internal` package to make this clear,
+and will be promoted to an externally-importable package once the tool
+enters `beta` state.
