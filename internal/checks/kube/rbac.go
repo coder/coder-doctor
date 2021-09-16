@@ -17,7 +17,7 @@ import (
 	authorizationv1 "k8s.io/api/authorization/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	authorizationclientv1 "k8s.io/client-go/kubernetes/typed/authorization/v1"
+	authorizationv1client "k8s.io/client-go/kubernetes/typed/authorization/v1"
 	rbacutil "k8s.io/kubectl/pkg/util/rbac"
 	"k8s.io/kubectl/pkg/util/slice"
 )
@@ -194,7 +194,7 @@ func (k *KubernetesChecker) checkRBACFallback(ctx context.Context) []*api.CheckR
 	return results
 }
 
-func (k *KubernetesChecker) checkOneRBACSSAR(ctx context.Context, authClient authorizationclientv1.AuthorizationV1Interface, req *ResourceRequirement, reqVerbs ResourceVerbs) error {
+func (k *KubernetesChecker) checkOneRBACSSAR(ctx context.Context, authClient authorizationv1client.AuthorizationV1Interface, req *ResourceRequirement, reqVerbs ResourceVerbs) error {
 	have := make([]string, 0, len(reqVerbs))
 	for _, verb := range reqVerbs {
 		sar := &authorizationv1.SelfSubjectAccessReview{
