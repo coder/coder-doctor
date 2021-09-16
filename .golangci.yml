@@ -49,60 +49,18 @@ linters-settings:
 
   importas:
     no-unaliased: true
-    # These primarily come from clientset.go in k8s.io/client-go. Even the
-    # official Kubernetes codebase has conflicts, though.
     alias:
-      - pkg: k8s.io/api/core/(v[\w\d]+)
-        alias: core$1
-      - pkg: k8s.io/api/authorization/(v[\w\d]+)
-        alias: authorization$1
+      - pkg: k8s.io/api/(\w+)/(v[\w\d]+)
+        alias: ${1}${2}
 
       - pkg: k8s.io/apimachinery/pkg/apis/meta/(v[\w\d]+)
-        alias: meta$1
+        alias: meta${1}
 
-      - pkg: k8s.io/client-go/kubernetes/typed/admissionregistration/(v[\w\d]+)
-        alias: admissionregistration$1
-      - pkg: k8s.io/client-go/kubernetes/typed/apps/(v[\w\d]+)
-        alias: apps$1
-      - pkg: k8s.io/client-go/kubernetes/typed/authentication/(v[\w\d]+)
-        alias: authentication$1
-      - pkg: k8s.io/client-go/kubernetes/typed/authorization/(v[\w\d]+)
-        alias: authorizationclient$1
-      - pkg: k8s.io/client-go/kubernetes/typed/autoscaling/(v[\w\d]+)
-        alias: autoscaling$1
-      - pkg: k8s.io/client-go/kubernetes/typed/batch/(v[\w\d]+)
-        alias: batch$1
-      - pkg: k8s.io/client-go/kubernetes/typed/certificates/(v[\w\d]+)
-        alias: certificates$1
-      - pkg: k8s.io/client-go/kubernetes/typed/coordination/(v[\w\d]+)
-        alias: coordination$1
-      - pkg: k8s.io/client-go/kubernetes/typed/discovery/(v[\w\d]+)
-        alias: discovery$1
-      - pkg: k8s.io/client-go/kubernetes/typed/events/(v[\w\d]+)
-        alias: events$1
-      - pkg: k8s.io/client-go/kubernetes/typed/extensions/(v[\w\d]+)
-        alias: extensions$1
-      - pkg: k8s.io/client-go/kubernetes/typed/flowcontrol/(v[\w\d]+)
-        alias: flowcontrol$1
-      - pkg: k8s.io/client-go/kubernetes/typed/apiserverinternal/(v[\w\d]+)
-        alias: internal$1
-      - pkg: k8s.io/client-go/kubernetes/typed/networking/(v[\w\d]+)
-        alias: networking$1
-      - pkg: k8s.io/client-go/kubernetes/typed/node/(v[\w\d]+)
-        alias: node$1
-      - pkg: k8s.io/client-go/kubernetes/typed/policy/(v[\w\d]+)
-        alias: policy$1
-      - pkg: k8s.io/client-go/kubernetes/typed/rbac/(v[\w\d]+)
-        alias: rbac$1
-      - pkg: k8s.io/client-go/kubernetes/typed/scheduling/(v[\w\d]+)
-        alias: scheduling$1
-      - pkg: k8s.io/client-go/kubernetes/typed/storage/(v[\w\d]+)
-        alias: storage$1
-      - pkg: k8s.io/client-go/kubernetes/typed/core/(v[\w\d]+)
-        alias: typedcore$1
+      - pkg: k8s.io/client-go/kubernetes/typed/(\w+)/(v[\w\d]+)
+        alias: ${1}${2}client
 
       - pkg: k8s.io/metrics/pkg/apis/metrics/(v[\w\d]+)
-        alias: metrics$1
+        alias: metrics${1}
 
   revive:
     # see https://github.com/mgechev/revive#available-rules for details.
