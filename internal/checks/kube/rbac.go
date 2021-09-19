@@ -70,7 +70,11 @@ func (k *KubernetesChecker) checkRBACDefault(ctx context.Context) ([]*api.CheckR
 		breakdownRules = append(breakdownRules, rbacutil.BreakdownRule(rule)...)
 	}
 
-	compactRules, _ := rbacutil.CompactRules(breakdownRules) //nolint:errcheck - err is always nil
+	compactRules, err := rbacutil.CompactRules(breakdownRules)
+	if err != nil {
+		return nil, xerrors.Errorf("compact rules: %w", err)
+	}
+
 	sort.Stable(rbacutil.SortableRuleSlice(compactRules))
 	for _, r := range compactRules {
 		k.log.Debug(ctx, "Got SSRR PolicyRule", slog.F("rule", r))
