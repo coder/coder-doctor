@@ -47,7 +47,8 @@ enters `beta` state.
 ## Copyright and License
 
 coder-doctor preflight diagnostic tool
-Copyright (C) 2021 Coder Technologies, Inc. <https://coder.com>
+
+Copyright (C) 2021 Coder Technologies, Inc. &lt;https://coder.com&gt;
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
