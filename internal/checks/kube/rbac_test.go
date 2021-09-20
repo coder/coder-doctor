@@ -2,13 +2,16 @@ package kube
 
 import (
 	"context"
-	"net/http"
 	"testing"
 
+	"golang.org/x/xerrors"
 	authorizationv1 "k8s.io/api/authorization/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes"
+	fake "k8s.io/client-go/kubernetes/fake"
 	"k8s.io/client-go/rest"
+	k8stesting "k8s.io/client-go/testing"
 
 	"cdr.dev/slog/sloggers/slogtest/assert"
 
@@ -17,7 +20,6 @@ import (
 
 func Test_CheckRBAC_Error(t *testing.T) {
 	t.Parallel()
-
 	srv := newTestHTTPServer(t, 500, nil)
 	defer srv.Close()
 	client, err := kubernetes.NewForConfig(&rest.Config{Host: srv.URL})
@@ -28,6 +30,7 @@ func Test_CheckRBAC_Error(t *testing.T) {
 	assert.True(t, "should contain one result", len(results) == 1)
 	assert.True(t, "result should be failed", results[0].State == api.StateFailed)
 }
+
 func Test_CheckRBACFallback(t *testing.T) {
 	t.Parallel()
 
@@ -42,7 +45,7 @@ func Test_CheckRBACFallback(t *testing.T) {
 			F: func(t *testing.T, results []*api.CheckResult) {
 				assert.False(t, "results should not be empty", len(results) == 0)
 				for _, result := range results {
-					assert.True(t, result.Name+" should not error", result.Details["error"] == nil)
+					assert.Equal(t, result.Name+" should not error", result.Details["error"], nil)
 					assert.True(t, result.Name+" should pass", result.State == api.StatePassed)
 				}
 			},
@@ -65,11 +68,13 @@ func Test_CheckRBACFallback(t *testing.T) {
 		t.Run(test.Name, func(t *testing.T) {
 			t.Parallel()
 
-			server := newTestHTTPServer(t, http.StatusOK, test.Response)
-			defer server.Close()
-
-			client, err := kubernetes.NewForConfig(&rest.Config{Host: server.URL})
-			assert.Success(t, "failed to create client", err)
+			client := fake.NewSimpleClientset()
+			fakeAction := func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
+				return true, test.Response, nil
+			}
+			// NOTE: Use PrependReactor! AddReactor appends the action after the reaction chain
+			// which by default includes a "catch-all" action which is not what we want here!
+			client.Fake.PrependReactor("create", "selfsubjectaccessreviews", fakeAction)
 
 			checker := NewKubernetesChecker(client)
 			results := checker.checkRBACFallback(context.Background())
@@ -80,11 +85,13 @@ func Test_CheckRBACFallback(t *testing.T) {
 
 func Test_CheckRBACFallback_ClientError(t *testing.T) {
 	t.Parallel()
-
-	server := newTestHTTPServer(t, http.StatusInternalServerError, nil)
-
-	client, err := kubernetes.NewForConfig(&rest.Config{Host: server.URL})
-	assert.Success(t, "failed to create client", err)
+	client := fake.NewSimpleClientset()
+	fakeAction := func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
+		return true, nil, xerrors.New("ouch")
+	}
+	// NOTE: Use PrependReactor! AddReactor appends the action after the reaction chain
+	// which by default includes a "catch-all" action which is not what we want here!
+	client.Fake.PrependReactor("create", "selfsubjectaccessreviews", fakeAction)
 
 	checker := NewKubernetesChecker(client)
 	results := checker.checkRBACFallback(context.Background())
@@ -97,12 +104,14 @@ func Test_CheckRBACFallback_ClientError(t *testing.T) {
 var selfSubjectAccessReviewAllowed authorizationv1.SelfSubjectAccessReview = authorizationv1.SelfSubjectAccessReview{
 	Status: authorizationv1.SubjectAccessReviewStatus{
 		Allowed: true,
+		Reason:  "test says yes",
 	},
 }
 
 var selfSubjectAccessReviewDenied authorizationv1.SelfSubjectAccessReview = authorizationv1.SelfSubjectAccessReview{
 	Status: authorizationv1.SubjectAccessReviewStatus{
 		Allowed: false,
+		Reason:  "test says no",
 	},
 }
 
@@ -133,11 +142,15 @@ func Test_CheckRBACDefault(t *testing.T) {
 		t.Run(test.Name, func(t *testing.T) {
 			t.Parallel()
 
-			server := newTestHTTPServer(t, http.StatusOK, test.Response)
-			defer server.Close()
+			//assert.Success(t, "failed to create client", err)
+			client := fake.NewSimpleClientset()
 
-			client, err := kubernetes.NewForConfig(&rest.Config{Host: server.URL})
-			assert.Success(t, "failed to create client", err)
+			fakeAction := func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
+				return true, test.Response, nil
+			}
+			// NOTE: Use PrependReactor! AddReactor appends the action after the reaction chain
+			// which by default includes a "catch-all" action which is not what we want here!
+			client.Fake.PrependReactor("create", "selfsubjectrulesreviews", fakeAction)
 
 			checker := NewKubernetesChecker(client)
 			results, err := checker.checkRBACDefault(context.Background())
