@@ -142,7 +142,6 @@ func Test_CheckRBACDefault(t *testing.T) {
 		t.Run(test.Name, func(t *testing.T) {
 			t.Parallel()
 
-			//assert.Success(t, "failed to create client", err)
 			client := fake.NewSimpleClientset()
 
 			fakeAction := func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
