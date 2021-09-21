@@ -28,7 +28,8 @@ You can manually download the latest [release](https://github.com/cdr/coder-doct
 1. (Optional, recommended) Download the `checksums.txt` for the desired
    release and verify the `sha256` checksum of the file you downloaded.
 1. Extract the `coder-doctor` binary.
-1. Move the `coder-doctor` binary to somewhere in your `$PATH`.
+1. Move the `coder-doctor` binary to somewhere in your `$PATH` (e.g., `mv coder-doctor /usr/local/bin/coder-doctor` for macOS/Linux).
+2. (macOS Users) You may need to [grant `coder-doctor` additional permissions](https://support.apple.com/en-us/HT202491) before running.
 
 Alternatively, use the below command, replacing `$VERSION`, `$OSTYPE`
 (one of `darwin`, `linux`, `windows`) and `$ARCH` (one of `amd64`, `arm64`)
