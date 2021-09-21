@@ -27,7 +27,7 @@ updates:
     ignore:
       # Ignore major and minor updates to Kubernetes packages, as we
       # manage these versions manually according to our version policy:
-      # https://www.notion.so/coderhq/Kubernetes-version-support-strategy-82ecd5c9761e411e9dab61a7a1484418
+      # https://coder.com/docs/coder/latest/setup/kubernetes#supported-kubernetes-versions
       - dependency-name: k8s.io/api
         update-types:
           - version-update:semver-major
@@ -37,6 +37,10 @@ updates:
           - version-update:semver-major
           - version-update:semver-minor
       - dependency-name: k8s.io/client-go
+        update-types:
+          - version-update:semver-major
+          - version-update:semver-minor
+      - dependency-name: k8s.io/kubectl
         update-types:
           - version-update:semver-major
           - version-update:semver-minor
