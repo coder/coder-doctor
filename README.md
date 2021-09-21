@@ -25,18 +25,19 @@ You can manually download the latest [release](https://github.com/cdr/coder-doct
 
 1. Click a release and download the tar file for your operating system
    (ex: coder-doctor-linux-amd64.tar.gz)
-2. (Optional, recommended) Download the `checksums.txt` for the desired
+1. (Optional, recommended) Download the `checksums.txt` for the desired
    release and verify the `sha256` checksum of the file you downloaded.
-3. Extract the `coder-doctor` binary.
-4. Move the `coder-doctor` binary to somewhere in your `$PATH`.
+1. Extract the `coder-doctor` binary.
+1. Move the `coder-doctor` binary to somewhere in your `$PATH`.
 
-Alternatively, use the below one-liner, replacing `$VERSION`, `$OSTYPE`
+Alternatively, use the below command, replacing `$VERSION`, `$OSTYPE`
 (one of `darwin`, `linux`, `windows`) and `$ARCH` (one of `amd64`, `arm64`)
 as required:
 
-```bash
-curl -fSsL "https://github.com/cdr/coder-doctor/releases/latest/download/coder-doctor_$VERSION_$OSTYPE_$ARCH.tar.gz" -o coder-doctor.tar.gz
-tar -xzvf coder-doctor.tar.gz
+```shell-session
+$ curl -fSsL "https://github.com/cdr/coder-doctor/releases/latest/download/coder-doctor_${VERSION}_${OSTYPE}_${ARCH}.tar.gz" | tar -xzvf -
+README.md
+coder-doctor
 ```
 
 ## Usage
