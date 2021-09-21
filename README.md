@@ -19,6 +19,27 @@ permissions to run Coder.
 - Kubernetes Resosurces: checks that the cluster has the required
 resource types available to run Coder.
 
+## Installation
+
+You can manually download the latest [release](https://github.com/cdr/coder-doctor/releases):
+
+1. Click a release and download the tar file for your operating system
+   (ex: coder-doctor-linux-amd64.tar.gz)
+1. (Optional, recommended) Download the `checksums.txt` for the desired
+   release and verify the `sha256` checksum of the file you downloaded.
+1. Extract the `coder-doctor` binary.
+1. Move the `coder-doctor` binary to somewhere in your `$PATH`.
+
+Alternatively, use the below command, replacing `$VERSION`, `$OSTYPE`
+(one of `darwin`, `linux`, `windows`) and `$ARCH` (one of `amd64`, `arm64`)
+as required:
+
+```shell-session
+$ curl -fSsL "https://github.com/cdr/coder-doctor/releases/latest/download/coder-doctor_${VERSION}_${OSTYPE}_${ARCH}.tar.gz" | tar -xzvf -
+README.md
+coder-doctor
+```
+
 ## Usage
 
 To check if your Kubernetes cluster is ready to install Coder, run:
