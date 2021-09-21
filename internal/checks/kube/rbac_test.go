@@ -15,7 +15,7 @@ import (
 
 	"cdr.dev/slog/sloggers/slogtest/assert"
 
-	"github.com/cdr/coder-doctor/internal/api"
+	"cdr.dev/coder-doctor/internal/api"
 )
 
 func Test_CheckRBAC_Error(t *testing.T) {

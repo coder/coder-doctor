@@ -7,7 +7,7 @@ import (
 	"golang.org/x/xerrors"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 
-	"github.com/cdr/coder-doctor/internal/api"
+	"cdr.dev/coder-doctor/internal/api"
 )
 
 func (k *KubernetesChecker) CheckResources(_ context.Context) []*api.CheckResult {

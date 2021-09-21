@@ -3,7 +3,7 @@ package kube
 import (
 	"github.com/Masterminds/semver/v3"
 
-	"github.com/cdr/coder-doctor/internal/api"
+	"cdr.dev/coder-doctor/internal/api"
 )
 
 // This is a list of all known Resource and/or RBAC requirements for each verison of Coder.

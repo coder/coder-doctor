@@ -3,8 +3,8 @@ package api_test
 import (
 	"testing"
 
+	"cdr.dev/coder-doctor/internal/api"
 	"cdr.dev/slog/sloggers/slogtest/assert"
-	"github.com/cdr/coder-doctor/internal/api"
 )
 
 func TestWarnResult(t *testing.T) {

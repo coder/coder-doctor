@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/cdr/coder-doctor/internal/cmd"
+	"cdr.dev/coder-doctor/internal/cmd"
 )
 
 func main() {
