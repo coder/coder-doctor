@@ -13,6 +13,7 @@ linters-settings:
               - k8s.io/api
               - k8s.io/apimachinery
               - k8s.io/client-go
+              - k8s.io/kubectl
               - k8s.io/metrics
               - k8s.io/utils
             reason: >-
@@ -34,6 +35,12 @@ linters-settings:
               two prior minor releases and current release. For details, see
               https://www.notion.so/Kubernetes-version-support-strategy-82ecd5c9761e411e9dab61a7a1484418
         - k8s.io/client-go:
+            version: "< 0.19 || > 0.20"
+            reason: >-
+              Coder commits to supporting the newest patch release of the
+              two prior minor releases and current release. For details, see
+              https://www.notion.so/Kubernetes-version-support-strategy-82ecd5c9761e411e9dab61a7a1484418
+        - k8s.io/kubectl:
             version: "< 0.19 || > 0.20"
             reason: >-
               Coder commits to supporting the newest patch release of the
