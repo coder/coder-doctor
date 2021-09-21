@@ -10,14 +10,14 @@ preflight checks:
 
 ### Kubernetes
 
-- Kubernetes Version: checks the cluster version for compatibility
-with the requested version of Coder.
+- Kubernetes Version: checks that the selected Coder version is
+  compatible with the Kubernetes control plane.
 - Helm Version: checks the locally-installed Helm version for
-compatibility with the requested version of Coder.
+  compatibility with the requested version of Coder.
 - Kubernetes RBAC: checks that the service account has the required
-permissions to run Coder.
-- Kubernetes Resosurces: checks that the cluster has the required
-resource types available to run Coder.
+  permissions to run Coder.
+- Kubernetes Resources: checks that the cluster has the required
+  resource types available to run Coder.
 
 ## Usage
 
@@ -33,16 +33,30 @@ For more information, you can run:
 coder-doctor -h
 ```
 
+## Development
+
+To run from source, clone the repository and run:
+
+```bash
+go run . help
+```
+
+The `Makefile` also includes various helpful targets to run
+linters and tests, but standard Go tools (e.g. `go test`)
+should work as well.
+
 ## Feedback
 
-We love feedback! If you have any issues or suggestions, please feel
-free to submit an [issue](https://github.com/cdr/coder-doctor/issues) or [pull request](https://github.com/cdr/coder-doctor/pulls).
+We love feedback! Please [open an issue] or [submit a pull request]
+with any ideas for improving this.
 
-**Note:** This project is in `alpha` state and Coder offers no
-compatibility guarantees, either for the tool itself or any public Go
-APIs. Most code is kept in the `internal` package to make this clear,
-and will be promoted to an externally-importable package once the tool
-enters `beta` state.
+[open an issue]: https://github.com/cdr/coder-doctor/issues
+[submit a pull request]: https://github.com/cdr/coder-doctor/pulls
+
+**Note:** This tool is in `beta` state and Coder offers no compatibility
+guarantees, either for the tool itself or any public Go APIs. Most code
+is kept in the `internal` package to make this clear, and will be promoted
+to an externally-importable package once things stabilize.
 
 ## Copyright and License
 
