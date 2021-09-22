@@ -10,15 +10,15 @@ source "./scripts/lib.sh"
 run_trace false trivy --version
 
 trivy_flags=(
-  --vuln-type=os,library
-  --severity=MEDIUM,HIGH,CRITICAL
-  --exit-code=1
-  --security-checks=vuln,config
+  "--vuln-type=os,library"
+  "--severity=MEDIUM,HIGH,CRITICAL"
+  "--exit-code=1"
+  "--security-checks=vuln,config"
 )
 
 if [ -n "${CI:-}" ]; then
   trivy_flags+=(
-    --no-progress
+    "--no-progress"
   )
 fi
 
