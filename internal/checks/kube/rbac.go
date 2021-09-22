@@ -80,7 +80,7 @@ func (k *KubernetesChecker) checkRBACDefault(ctx context.Context) ([]*api.CheckR
 		k.log.Debug(ctx, "Got SSRR PolicyRule", slog.F("rule", r))
 	}
 
-	// TODO: optimise this
+	// TODO: optimize this
 	for req, reqVerbs := range k.reqs.ResourceRequirements {
 		if err := satisfies(req, reqVerbs, compactRules); err != nil {
 			summary := fmt.Sprintf("resource %s: %s", req.Resource, err)
