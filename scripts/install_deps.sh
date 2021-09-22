@@ -51,11 +51,17 @@ GORELEASER_VERSION="0.178.0"
 run_trace false curl "${curl_flags[@]}" "https://github.com/goreleaser/goreleaser/releases/download/v${GORELEASER_VERSION}/goreleaser_Linux_x86_64.tar.gz" \| \
   tar --extract --gzip --directory="$TMPBIN" --file=- "goreleaser"
 
+# trivy to scan container images
+TRIVY_VERSION="0.19.2"
+run_trace false curl "${curl_flags[@]}" "https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}/trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz" \| \
+  tar --extract --gzip --directory="$TMPBIN" --file=- "trivy"
+
 run_trace false sudo install --mode=0755 --target-directory="$BINDIR" "$TMPBIN/*"
 
 run_trace false command -v \
   golangci-lint \
   goreleaser \
-  gotestsum
+  gotestsum \
+  trivy
 
 run_trace false sudo rm --verbose --recursive --force "$TMPDIR"

@@ -1,0 +1,53 @@
+name: Security
+
+on:
+  push:
+    branches:
+      - main
+
+  # If the workflow is modified, run the scans (though still using code
+  # checked out from master) so that we can test the workflow itself
+  pull_request:
+    branches:
+      - main
+    paths:
+      - .github/workflows/security.yaml
+
+  schedule:
+    # Run at 10:15 am UTC (3:15am PT/5:15am CT)
+    # Run at 0 minutes 0 hours of every day.
+    - cron: "15 10 * * *"
+
+  workflow_dispatch:
+
+permissions:
+  actions: none
+  checks: none
+  contents: read
+  deployments: none
+  issues: none
+  packages: none
+  pull-requests: none
+  repository-projects: none
+  security-events: none
+  statuses: none
+
+jobs:
+  scan-source:
+    name: scan/source
+    steps:
+      - name: Cancel previous runs
+        if: github.event_name == 'pull_request'
+        uses: styfle/cancel-workflow-action@0.9.1
+
+      - name: Checkout
+        uses: actions/checkout@v2
+        # with:
+        # ref: "main"
+
+      - name: Install dependencies
+        run: ./scripts/install_deps.sh
+
+      - name: Scan with AquaSec Trivy
+        run: ./scripts/scan.sh
+        continue-on-error: true
