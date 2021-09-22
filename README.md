@@ -1,5 +1,11 @@
 # Coder Doctor 🧑‍⚕️
 
+[![GitHub Release](https://img.shields.io/github/v/release/cdr/coder-doctor?color=6b9ded&include_prerelease=false)](https://github.com/cdr/coder-doctor/releases)
+[![Documentation](https://godoc.org/cdr.dev/coder-doctor?status.svg)](https://pkg.go.dev/cdr.dev/coder-doctor)
+[![Go Report Card](https://goreportcard.com/badge/cdr.dev/coder-doctor)](https://goreportcard.com/report/cdr.dev/coder-doctor)
+[![build](https://github.com/cdr/coder-doctor/actions/workflows/build.yaml/badge.svg?event=push&branch=main)](https://github.com/cdr/coder-doctor/actions/workflows/build.yaml?query=branch%3Amain)
+[![Coverage Status](https://coveralls.io/repos/github/cdr/coder-doctor/badge.svg?branch=main&t=sEVzim)](https://coveralls.io/github/cdr/coder-doctor?branch=main)
+
 Coder Doctor is a command-line diagnostic tool for checking that a
 given platform can run the Coder control plane and workspaces.
 
