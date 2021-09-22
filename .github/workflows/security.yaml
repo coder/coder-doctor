@@ -5,8 +5,8 @@ on:
     branches:
       - main
 
-  # If the workflow is modified, run the scans (though still using code
-  # checked out from master) so that we can test the workflow itself
+  # If the workflow is modified, run the scans, so that we can test the
+  # workflow itself
   pull_request:
     branches:
       - main
@@ -35,6 +35,7 @@ permissions:
 jobs:
   scan-source:
     name: scan/source
+    runs-on: ubuntu-20.04
     steps:
       - name: Cancel previous runs
         if: github.event_name == 'pull_request'
@@ -42,8 +43,6 @@ jobs:
 
       - name: Checkout
         uses: actions/checkout@v2
-        # with:
-        # ref: "main"
 
       - name: Install dependencies
         run: ./scripts/install_deps.sh
