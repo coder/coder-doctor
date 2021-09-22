@@ -6,7 +6,7 @@ import (
 	"cdr.dev/coder-doctor/internal/api"
 )
 
-// This is a list of all known Resource and/or RBAC requirements for each verison of Coder.
+// This is a list of all known Resource and/or RBAC requirements for each version of Coder.
 // Order by version DESCENDING.
 var allRequirements = []VersionedResourceRequirements{
 	{
