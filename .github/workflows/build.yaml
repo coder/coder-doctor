@@ -9,6 +9,10 @@ on:
     branches:
       - main
 
+  schedule:
+    # Run daily at 10:15 am UTC (3:15am PT/5:15am CT)
+    - cron: "15 10 * * *"
+
   workflow_dispatch:
 
 permissions:
@@ -25,7 +29,7 @@ permissions:
 
 jobs:
   build:
-    name: Build
+    name: build
     runs-on: ubuntu-20.04
     steps:
       - name: Cancel Previous Runs
@@ -57,3 +61,26 @@ jobs:
           distribution: goreleaser
           version: latest
           args: release --rm-dist --snapshot --skip-publish
+
+  scan-source:
+    name: scan/source
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Cancel previous runs
+        if: github.event_name == 'pull_request'
+        uses: styfle/cancel-workflow-action@0.9.1
+
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Install Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: '^1.16.7'
+
+      - name: Install dependencies
+        run: ./scripts/install_deps.sh
+
+      - name: Scan with AquaSec Trivy
+        run: ./scripts/scan.sh
+        continue-on-error: true
