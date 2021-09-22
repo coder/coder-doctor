@@ -8,8 +8,8 @@ import (
 
 	"github.com/Masterminds/semver/v3"
 
+	"cdr.dev/coder-doctor/internal/api"
 	"cdr.dev/slog"
-	"github.com/cdr/coder-doctor/internal/api"
 )
 
 const LocalHelmVersionCheck = "local-helm-version"

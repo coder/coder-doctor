@@ -1,6 +1,6 @@
 package summarywriter
 
-import "github.com/cdr/coder-doctor/internal/api"
+import "cdr.dev/coder-doctor/internal/api"
 
 type SummaryResult struct {
 	Passed  int `json:"passed"`

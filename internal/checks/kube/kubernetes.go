@@ -11,7 +11,7 @@ import (
 	"cdr.dev/slog"
 	"cdr.dev/slog/sloggers/sloghuman"
 
-	"github.com/cdr/coder-doctor/internal/api"
+	"cdr.dev/coder-doctor/internal/api"
 )
 
 var _ = api.Checker(&KubernetesChecker{})

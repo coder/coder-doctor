@@ -3,9 +3,9 @@ package summarywriter_test
 import (
 	"testing"
 
+	"cdr.dev/coder-doctor/internal/api"
+	"cdr.dev/coder-doctor/internal/summarywriter"
 	"cdr.dev/slog/sloggers/slogtest/assert"
-	"github.com/cdr/coder-doctor/internal/api"
-	"github.com/cdr/coder-doctor/internal/summarywriter"
 )
 
 func TestSummaryWriter(t *testing.T) {

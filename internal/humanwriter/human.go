@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/cdr/coder-doctor/internal/api"
+	"cdr.dev/coder-doctor/internal/api"
 )
 
 var _ = api.ResultWriter(&HumanResultWriter{})

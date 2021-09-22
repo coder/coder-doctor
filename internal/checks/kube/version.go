@@ -10,7 +10,7 @@ import (
 
 	"cdr.dev/slog"
 
-	"github.com/cdr/coder-doctor/internal/api"
+	"cdr.dev/coder-doctor/internal/api"
 )
 
 type CoderVersionRequirement struct {

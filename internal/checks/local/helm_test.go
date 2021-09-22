@@ -7,8 +7,8 @@ import (
 
 	"github.com/Masterminds/semver/v3"
 
+	"cdr.dev/coder-doctor/internal/api"
 	"cdr.dev/slog/sloggers/slogtest/assert"
-	"github.com/cdr/coder-doctor/internal/api"
 )
 
 func Test_CheckLocalHelmVersion(t *testing.T) {

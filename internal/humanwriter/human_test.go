@@ -4,9 +4,9 @@ import (
 	"strings"
 	"testing"
 
+	"cdr.dev/coder-doctor/internal/api"
+	"cdr.dev/coder-doctor/internal/humanwriter"
 	"cdr.dev/slog/sloggers/slogtest/assert"
-	"github.com/cdr/coder-doctor/internal/api"
-	"github.com/cdr/coder-doctor/internal/humanwriter"
 )
 
 func TestHumanWriter(t *testing.T) {

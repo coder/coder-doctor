@@ -10,8 +10,8 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 
+	"cdr.dev/coder-doctor/internal/api"
 	"cdr.dev/slog/sloggers/slogtest/assert"
-	"github.com/cdr/coder-doctor/internal/api"
 )
 
 func TestVersions(t *testing.T) {

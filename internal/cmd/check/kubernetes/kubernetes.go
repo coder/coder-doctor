@@ -20,10 +20,10 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth/openstack"
 	"k8s.io/client-go/tools/clientcmd"
 
-	"github.com/cdr/coder-doctor/internal/api"
-	"github.com/cdr/coder-doctor/internal/checks/kube"
-	"github.com/cdr/coder-doctor/internal/checks/local"
-	"github.com/cdr/coder-doctor/internal/humanwriter"
+	"cdr.dev/coder-doctor/internal/api"
+	"cdr.dev/coder-doctor/internal/checks/kube"
+	"cdr.dev/coder-doctor/internal/checks/local"
+	"cdr.dev/coder-doctor/internal/humanwriter"
 )
 
 func NewCommand() *cobra.Command {
