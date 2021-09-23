@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"golang.org/x/xerrors"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 
 	"cdr.dev/coder-doctor/internal/api"
@@ -46,14 +45,23 @@ func (k *KubernetesChecker) CheckResources(_ context.Context) []*api.CheckResult
 	}
 
 	for versionReq := range k.reqs.ResourceRequirements {
-		if !resourcesAvailable[*versionReq] {
-			msg := fmt.Sprintf("missing required resource:%q group:%q version:%q", versionReq.Resource, versionReq.Group, versionReq.Version)
-			errResult := api.ErrorResult(checkName, msg, xerrors.New(msg))
-			results = append(results, errResult)
-			continue
+		result := &api.CheckResult{
+			Summary: checkName,
+			Details: map[string]interface{}{
+				"resource":     versionReq.Resource,
+				"group":        versionReq.Group,
+				"groupVersion": versionReq.Version,
+			},
 		}
-		msg := fmt.Sprintf("found required resource:%q group:%q version:%q", versionReq.Resource, versionReq.Group, versionReq.Version)
-		results = append(results, api.PassResult(checkName, msg))
+
+		if resourcesAvailable[*versionReq] {
+			result.Summary = fmt.Sprintf("Cluster supports %s resource %s", versionReq.Version, versionReq.Resource)
+			result.State = api.StatePassed
+		} else {
+			result.Summary = fmt.Sprintf("Cluster does not support %s resource %s", versionReq.Version, versionReq.Resource)
+			result.State = api.StateFailed
+		}
+		results = append(results, result)
 	}
 
 	return results

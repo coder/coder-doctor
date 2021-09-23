@@ -29,6 +29,8 @@ func Test_KubernetesChecker_CheckResources(t *testing.T) {
 			F: func(t *testing.T, results []*api.CheckResult) {
 				assert.False(t, "results should not be empty", len(results) == 0)
 				for _, result := range results {
+					assert.False(t, result.Name+" should have a resource", len(result.Details["resource"].(string)) == 0)
+					assert.False(t, result.Name+" should have a groupVersion", len(result.Details["groupVersion"].(string)) == 0)
 					assert.Equal(t, result.Name+" should have no error", nil, result.Details["error"])
 					assert.Equal(t, result.Name+" should pass", api.StatePassed, result.State)
 				}
@@ -40,10 +42,10 @@ func Test_KubernetesChecker_CheckResources(t *testing.T) {
 			F: func(t *testing.T, results []*api.CheckResult) {
 				assert.False(t, "results should not be empty", len(results) == 0)
 				for _, result := range results {
-					resErr, ok := result.Details["error"].(error)
-					assert.True(t, result.Name+" should have an error", ok && resErr != nil)
-					assert.ErrorContains(t, result.Name+" should have an expected error", resErr, "missing required resource")
-					assert.True(t, result.Name+" should fail", result.State == api.StateFailed)
+					assert.False(t, result.Name+" should have a resource", len(result.Details["resource"].(string)) == 0)
+					assert.False(t, result.Name+" should have a groupVersion", len(result.Details["groupVersion"].(string)) == 0)
+					assert.Equal(t, result.Name+" should have no error", nil, result.Details["error"])
+					assert.Equal(t, result.Name+" should pass", api.StateFailed, result.State)
 				}
 			},
 		},
