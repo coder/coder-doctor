@@ -1,10 +1,10 @@
 # Coder Doctor 🧑‍⚕️
 
-[![GitHub Release](https://img.shields.io/github/v/release/cdr/coder-doctor?color=6b9ded&include_prerelease=false)](https://github.com/cdr/coder-doctor/releases)
+[![GitHub Release](https://img.shields.io/github/v/release/coder/coder-doctor?color=6b9ded&include_prerelease=false)](https://github.com/coder/coder-doctor/releases)
 [![Documentation](https://godoc.org/cdr.dev/coder-doctor?status.svg)](https://pkg.go.dev/cdr.dev/coder-doctor)
 [![Go Report Card](https://goreportcard.com/badge/cdr.dev/coder-doctor)](https://goreportcard.com/report/cdr.dev/coder-doctor)
-[![build](https://github.com/cdr/coder-doctor/actions/workflows/build.yaml/badge.svg?event=push&branch=main)](https://github.com/cdr/coder-doctor/actions/workflows/build.yaml?query=branch%3Amain)
-[![Coverage Status](https://coveralls.io/repos/github/cdr/coder-doctor/badge.svg?branch=main&t=sEVzim)](https://coveralls.io/github/cdr/coder-doctor?branch=main)
+[![build](https://github.com/coder/coder-doctor/actions/workflows/build.yaml/badge.svg?event=push&branch=main)](https://github.com/coder/coder-doctor/actions/workflows/build.yaml?query=branch%3Amain)
+[![Coverage Status](https://coveralls.io/repos/github/coder/coder-doctor/badge.svg?branch=main&t=sEVzim)](https://coveralls.io/github/coder/coder-doctor?branch=main)
 
 Coder Doctor is a command-line diagnostic tool for checking that a
 given platform can run the Coder control plane and workspaces.
@@ -27,7 +27,7 @@ preflight checks:
 
 ## Installation
 
-You can manually download the latest [release](https://github.com/cdr/coder-doctor/releases):
+You can manually download the latest [release](https://github.com/coder/coder-doctor/releases):
 
 1. Click a release and download the tar file for your operating system
    (ex: coder-doctor-linux-amd64.tar.gz)
@@ -78,8 +78,8 @@ should work as well.
 We love feedback! Please [open an issue] or [submit a pull request]
 with any ideas for improving this.
 
-[open an issue]: https://github.com/cdr/coder-doctor/issues
-[submit a pull request]: https://github.com/cdr/coder-doctor/pulls
+[open an issue]: https://github.com/coder/coder-doctor/issues
+[submit a pull request]: https://github.com/coder/coder-doctor/pulls
 
 **Note:** This tool is in `beta` state and Coder offers no compatibility
 guarantees, either for the tool itself or any public Go APIs. Most code
