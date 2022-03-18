@@ -42,7 +42,7 @@ Alternatively, use the below command, replacing `$VERSION`, `$OSTYPE`
 as required:
 
 ```shell-session
-$ curl -fSsL "https://github.com/cdr/coder-doctor/releases/latest/download/coder-doctor_${VERSION}_${OSTYPE}_${ARCH}.tar.gz" | tar -xzvf -
+$ curl -fSsL "https://github.com/coder/coder-doctor/releases/download/v${VERSION}/coder-doctor_${VERSION}_${OSTYPE}_${ARCH}.tar.gz" | tar -xzvf -
 README.md
 coder-doctor
 ```
